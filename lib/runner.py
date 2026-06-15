@@ -4448,11 +4448,12 @@ def _preflight_write_case(
     return errors
 
 
-def run_case(case: dict, on_event=None) -> RunResult:
+def run_case(case: dict, on_event=None, cancel_check=None) -> RunResult:
     """执行一份用例。返回 RunResult。
 
     on_event: 可选回调 callable(event_type: str, payload: dict)。
               用于 Web UI 的 SSE 推送。None = 纯 CLI，行为不变。
+    cancel_check: 可选无参回调。在步骤边界返回 True 时安全停止。
     """
     def emit(event_type: str, payload: dict | None = None):
         if on_event is not None:
@@ -4461,7 +4462,16 @@ def run_case(case: dict, on_event=None) -> RunResult:
             except Exception:
                 pass
 
+    def cancellation_requested() -> bool:
+        if cancel_check is None:
+            return False
+        try:
+            return bool(cancel_check())
+        except Exception:
+            return False
+
     result = RunResult()
+    cancelled = False
     case_contract = build_case_contract(case)
     contract_preflight = validate_case_contract_for_run(case)
 
@@ -4741,6 +4751,21 @@ def run_case(case: dict, on_event=None) -> RunResult:
     steps_to_run = [] if preflight_blocked else (case.get("steps") or [])
 
     for raw_step in steps_to_run:
+        if cancellation_requested():
+            cancelled = True
+            result.steps.append({
+                "id": "execution_cancelled",
+                "type": "cancelled",
+                "ok": False,
+                "optional": False,
+                "detail": "用户停止执行",
+                "error": "执行已在步骤边界停止。",
+            })
+            emit("case_cancelled", {
+                "message": "执行已在步骤边界停止。",
+                "completed_steps": len(result.steps) - 1,
+            })
+            break
         step = resolve_vars(raw_step, vars_ns)
         preparation_errors: list[str] = []
 
@@ -5219,7 +5244,25 @@ def run_case(case: dict, on_event=None) -> RunResult:
             if not optional: break
 
     # 6. 断言（先把 ${vars.xxx} 解析掉）
-    assertions_to_run = [] if preflight_blocked else list(case.get("assertions") or [])
+    if cancellation_requested() and not cancelled:
+        cancelled = True
+        result.steps.append({
+            "id": "execution_cancelled",
+            "type": "cancelled",
+            "ok": False,
+            "optional": False,
+            "detail": "用户停止执行",
+            "error": "执行已在断言前停止。",
+        })
+        emit("case_cancelled", {
+            "message": "执行已在断言前停止。",
+            "completed_steps": len(result.steps) - 1,
+        })
+    assertions_to_run = (
+        []
+        if preflight_blocked or cancelled
+        else list(case.get("assertions") or [])
+    )
     if (
         not preflight_blocked
         and _runtime_upload_records(ctx)
@@ -5314,7 +5357,7 @@ def run_case(case: dict, on_event=None) -> RunResult:
             })
 
     # 7. 失败时生成修复建议
-    if not result.passed:
+    if not result.passed and not cancelled:
         failure_analysis = None
         try:
             failure_analysis = classify_run_failure(result.steps, result.assertions, case)
@@ -5425,6 +5468,14 @@ def run_case(case: dict, on_event=None) -> RunResult:
         response_contract_results=runtime_evidence["response_contract_results"],
         readback_results=readback_results,
     )
+    if cancelled:
+        runtime_evidence["result_evidence"].update({
+            "outcome": "cancelled",
+            "request_success": False,
+            "action_success": False,
+            "contract_passed": False,
+            "write_verified": False,
+        })
     result.runtime_evidence = runtime_evidence
     result.end_ts = time.time()
     env_fields = _build_env_fields(case, result, ctx.get("env_resolution", {}))
@@ -5432,6 +5483,7 @@ def run_case(case: dict, on_event=None) -> RunResult:
         emit("env_fields_resolved", {"fields": env_fields})
     emit("case_done", {
         "passed": result.passed,
+        "cancelled": cancelled,
         "duration_s": round(result.duration, 2),
         "step_count": len(result.steps),
         "step_ok": sum(1 for s in result.steps if s.get("ok")),

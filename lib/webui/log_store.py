@@ -157,10 +157,19 @@ class LogStore:
 
     # ---------- 运行历史 ----------
 
-    def save_run_event(self, run_id: str, event_type: str, payload: dict):
+    def save_run_event(
+        self,
+        run_id: str,
+        event_type: str,
+        payload: dict,
+        *,
+        seq: int | None = None,
+    ):
         """把一次 run 的每个 SSE 事件追加到 logs/runs/<id>.jsonl"""
         f = self.log_dir / "runs" / f"{run_id}.jsonl"
         record = {"ts": time.time(), "type": event_type, "data": payload}
+        if seq is not None:
+            record["seq"] = seq
         try:
             with f.open("a", encoding="utf-8") as fp:
                 fp.write(json.dumps(record, ensure_ascii=False) + "\n")
