@@ -146,22 +146,55 @@ readback, and three stopped before their configured readback. No generic
 ## Web UI verification
 
 - vNext is the default page; `/legacy` and `COSMIC_WEBUI_MODE=legacy` remain rollback paths.
-- Desktop and 390 x 844 mobile workflows were operated in the in-app Browser.
-- Import, technical drawer, execution case selection, result workspace, legacy
-  fallback, responsive overflow, and console errors were checked.
-- The mobile page had no horizontal overflow.
+- The implemented information architecture is: case workspace, execution center,
+  run history, and AI troubleshooting; case detail contains overview, business
+  variables, steps, validation/contracts, runs, and technical diagnostics.
+- Variable maintenance persists the canonical lineage
+  `recorded_value -> user_override -> environment_resolved_value -> final_request_value`.
+  Browser verification changed a text field, saved it, refreshed readiness, and
+  confirmed the final effective value remained consistent.
+- Readiness distinguishes configured-but-unreachable environments using a cached
+  network probe. A refused endpoint was correctly classified
+  `environment_unavailable`; no run was presented as ready.
+- A reachable delayed-failure endpoint was then used to exercise the real runner:
+  start, SSE events, structured logs, stop request, safe cancellation, `case_done`,
+  history, and refresh recovery all completed with `cancelled`, never success.
+- Historical incomplete runs are shown as interrupted failures. Old events that
+  only contain a display name are compatibly matched to one existing YAML case;
+  deleted cases still return a minimum evidence diagnosis instead of HTTP 500.
+- AI troubleshooting was operated against a real login failure. It displayed the
+  environment/auth category, failed stage, evidence, suggested action, post-fix
+  verification, safety constraints, and a redacted context section.
+- Desktop 1440 x 900 and mobile 390 x 844 workflows were operated in the in-app
+  Browser. The mobile page had `scrollWidth == clientWidth == 390`; field lineage
+  was converted to stacked rows so no critical value column requires page-level
+  horizontal scrolling.
+- The final Browser screenshots were visually compared with the generated design
+  concept. The delivered UI keeps the three-region workbench, canonical field
+  table, readiness rail, execution/log workflow, and restrained visual hierarchy.
+- `/legacy` was opened and operated after the vNext checks.
 - Temporary screenshots and generated design concepts are excluded from publication.
 
 ## Tests and gates
 
 - V4 workspace pytest with private HAR fixtures: `643 passed`
-- Public V5 pytest without private HAR fixtures: `584 passed, 59 skipped`
+- Public V5 pytest without private HAR fixtures: `600 passed, 59 skipped`
 - HAR parser baseline: `13 samples`, `0 changed`
 - Core regression gate: passed
 - Sensitive fixture scan: passed
 - vNext JavaScript syntax checks: passed
 - `git diff --check`: passed
+- New coverage includes workspace aggregation, value persistence, exact-only
+  resolver application, repair confirmation, structured/redacted run snapshots,
+  interrupted history, cancellation, AI evidence/safety, vNext HTTP contracts,
+  resumable SSE/static contracts, and runner cancellation boundaries.
 - Real import and execution: 13/13 parsed, 9/13 executed through contracts
+
+The 13-sample results and metrics above are retained from the previously verified
+private regression run. The private HAR corpus is intentionally absent from this
+public V5 checkout, so this UI completion pass did not recreate or update those
+baselines. The current core gate reported `HAR compare: skipped` for that explicit
+reason and still passed the sensitive-data scan.
 
 The temporary historical execution baseline reported 101 differences because it
 does not contain the new scenario fields and reflects older target-environment

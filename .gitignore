@@ -71,6 +71,8 @@ Thumbs.db
 
 # Project specific
 logs/
+!lib/webui/static/vnext/js/logs/
+!lib/webui/static/vnext/js/logs/*.js
 *.log
 *.jsonl
 *.db

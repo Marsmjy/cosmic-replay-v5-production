@@ -35,9 +35,9 @@ if _sys.platform == "win32":
 
 import json
 import os
-import queue
 import re
 import shutil
+import socket
 import sys
 import threading
 import time
@@ -45,6 +45,9 @@ import uuid
 import webbrowser
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime
+from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
 
 # ⭐ 导入任务管理器
 from lib.task_manager import TASK_MANAGER, CaseResult, ExecutionTask, enrich_case_result
@@ -100,8 +103,6 @@ def _dump_yaml_plain(obj) -> str:
         sort_keys=False,
         default_flow_style=False,
     )
-from pathlib import Path
-from typing import Any
 
 try:
     from fastapi import FastAPI, HTTPException, UploadFile, File, Body, Request
@@ -127,8 +128,15 @@ from lib.session_manager import SESSION_MGR
 from lib.webui.log_store import LogStore, install_global_capture
 from lib.notifier import EmailNotifier
 from lib.webui.application.har_import import HarImportService
+from lib.webui.application.case_workspace import CaseWorkspaceError, CaseWorkspaceService
+from lib.webui.application.run_workspace import (
+    build_run_snapshot,
+    export_diagnostic_bundle,
+)
+from lib.webui.diagnosis.ai_diagnosis import build_ai_diagnosis
 from lib.webui.repositories.case_repository import FileCaseRepository
 from lib.webui.routes.har import create_har_router
+from lib.webui.routes.workspace import create_workspace_router
 
 
 def _preview_entity_ids(preview: dict) -> set[str]:
@@ -279,21 +287,41 @@ LOG_STORE.add("info", "server", f"cosmic-replay Web UI 启动中... log_dir={_lo
 
 # 运行任务管理
 class RunSession:
-    """一次 run 的生命周期：事件 queue + 结果"""
+    """一次 run 的生命周期：可回放事件流、取消信号与结果。"""
     def __init__(self, run_id: str, case_name: str, env_id: str = ""):
         self.run_id = run_id
         self.case_name = case_name
         self.env_id = env_id
-        self.queue: queue.Queue = queue.Queue()
         self.started_at = time.time()
+        self.finished_at: float | None = None
         self.finished = False
+        self.events: list[dict] = []
+        self.condition = threading.Condition()
+        self.cancel_event = threading.Event()
         self.thread: threading.Thread | None = None
 
     def emit(self, event_type: str, payload: dict):
-        self.queue.put({"type": event_type, "data": payload, "ts": time.time()})
+        if event_type == "case_start":
+            payload = dict(payload)
+            payload.setdefault("case_file_name", self.case_name)
+            payload.setdefault("env_id", self.env_id)
+        with self.condition:
+            event = {
+                "seq": len(self.events) + 1,
+                "type": event_type,
+                "data": payload,
+                "ts": time.time(),
+            }
+            self.events.append(event)
+            self.condition.notify_all()
         # 同步持久化一份到 logs/runs/<id>.jsonl 供历史回放
         try:
-            LOG_STORE.save_run_event(self.run_id, event_type, payload)
+            LOG_STORE.save_run_event(
+                self.run_id,
+                event_type,
+                payload,
+                seq=event["seq"],
+            )
         except Exception:
             pass
         # ⭐ P1-2: 拦截case_done事件，记录到执行历史
@@ -312,9 +340,36 @@ class RunSession:
             except Exception:
                 pass
 
+    def request_cancel(self):
+        if self.finished:
+            return False
+        self.cancel_event.set()
+        self.emit("cancel_requested", {
+            "run_id": self.run_id,
+            "message": "已请求在当前步骤边界停止执行。",
+        })
+        return True
+
     def close(self):
-        self.finished = True
-        self.queue.put({"type": "_close", "data": {}, "ts": time.time()})
+        with self.condition:
+            self.finished = True
+            self.finished_at = time.time()
+            self.condition.notify_all()
+
+    def status(self) -> dict:
+        return {
+            "run_id": self.run_id,
+            "case_name": self.case_name,
+            "env_id": self.env_id,
+            "started_at": datetime.fromtimestamp(self.started_at).isoformat(),
+            "finished_at": (
+                datetime.fromtimestamp(self.finished_at).isoformat()
+                if self.finished_at else None
+            ),
+            "duration_s": round((self.finished_at or time.time()) - self.started_at, 2),
+            "finished": self.finished,
+            "cancel_requested": self.cancel_event.is_set(),
+        }
 
 
 RUNS: dict[str, RunSession] = {}
@@ -895,13 +950,44 @@ def api_run_case(name: str, body: dict = Body(default={})):
 
     def worker():
         try:
-            run_case(case, on_event=sess.emit)
+            run_case(
+                case,
+                on_event=sess.emit,
+                cancel_check=sess.cancel_event.is_set,
+            )
         except Exception as e:
             import traceback
             tb = traceback.format_exc()
             LOG_STORE.add("error", "runner",
                          f"run_case 异常 run_id={run_id} case={name}: {e}\n{tb}")
-            sess.emit("case_error", {"error": f"{type(e).__name__}: {e}"})
+            if sess.cancel_event.is_set():
+                sess.emit("case_cancelled", {
+                    "message": "执行已按用户请求停止。",
+                    "interrupted_error": f"{type(e).__name__}: {e}",
+                })
+                sess.emit("case_done", {
+                    "passed": False,
+                    "cancelled": True,
+                    "duration_s": round(time.time() - sess.started_at, 2),
+                    "step_count": 0,
+                    "step_ok": 0,
+                    "step_fail": 0,
+                    "assertion_ok": 0,
+                    "assertion_fail": 0,
+                    "assertion_advisory": 0,
+                    "readback_verified": 0,
+                    "maintenance_expected": 0,
+                    "maintenance_matched": 0,
+                    "result_evidence": {
+                        "outcome": "cancelled",
+                        "request_success": False,
+                        "action_success": False,
+                        "contract_passed": False,
+                        "write_verified": False,
+                    },
+                })
+            else:
+                sess.emit("case_error", {"error": f"{type(e).__name__}: {e}"})
         finally:
             sess.close()
 
@@ -913,28 +999,39 @@ def api_run_case(name: str, body: dict = Body(default={})):
 
 
 @APP.get("/api/runs/{run_id}/events")
-async def api_sse_events(run_id: str, request: Request):
-    """SSE 流。客户端 EventSource 订阅。"""
+async def api_sse_events(run_id: str, request: Request, after_seq: int = 0):
+    """可恢复 SSE 流。客户端可用 after_seq 或 Last-Event-ID 续接。"""
     sess = RUNS.get(run_id)
     if not sess:
         raise HTTPException(404, f"run_id 不存在: {run_id}")
 
     async def event_gen():
-        # 心跳 + 事件推送
+        header_cursor = request.headers.get("last-event-id", "")
+        try:
+            cursor = max(after_seq, int(header_cursor or 0))
+        except ValueError:
+            cursor = after_seq
         while True:
             if await request.is_disconnected():
                 break
-            try:
-                evt = sess.queue.get_nowait()
-            except queue.Empty:
+            with sess.condition:
+                pending = [event for event in sess.events if event["seq"] > cursor]
+                finished = sess.finished
+            if not pending:
+                if finished:
+                    yield "event: close\ndata: {}\n\n"
+                    break
                 await asyncio.sleep(1.0)
                 yield ": keepalive\n\n"
                 continue
-            if evt["type"] == "_close":
-                yield f"event: close\ndata: {{}}\n\n"
-                break
-            data_str = _safe_json_dumps(evt["data"])
-            yield f"event: {evt['type']}\ndata: {data_str}\n\n"
+            for evt in pending:
+                cursor = evt["seq"]
+                data_str = _safe_json_dumps(evt["data"])
+                yield (
+                    f"id: {evt['seq']}\n"
+                    f"event: {evt['type']}\n"
+                    f"data: {data_str}\n\n"
+                )
 
     return StreamingResponse(event_gen(), media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache",
@@ -950,6 +1047,9 @@ def api_list_runs():
             "case": r.case_name,
             "started_at": r.started_at,
             "finished": r.finished,
+            "env_id": r.env_id,
+            "cancel_requested": r.cancel_event.is_set(),
+            "event_count": len(r.events),
         }
         for r in list(RUNS.values())[-20:]
     ]
@@ -1209,6 +1309,185 @@ def _case_result_from_run_events(run_id: str, case_name: str, events: list[dict]
     if not result.ai_reason:
         result.ai_reason = failure_analysis.get("root_cause") or error
     return result.to_dict()
+
+
+def _case_history_records(case_name: str, limit: int = 20) -> list[dict]:
+    return [
+        item for item in LOG_STORE.list_runs(limit=max(limit * 5, 100))
+        if item.get("case_name") == case_name
+    ][:limit]
+
+
+def _case_workspace_service() -> CaseWorkspaceService:
+    return CaseWorkspaceService(
+        case_path=case_path_from_name,
+        repository=FileCaseRepository(),
+        env_getter=CONFIG.get_env,
+        default_env_getter=CONFIG.default_env,
+        history_reader=_case_history_records,
+        environment_probe=_probe_environment,
+    )
+
+
+_ENV_PROBE_CACHE: dict[str, tuple[float, bool, str]] = {}
+
+
+def _probe_environment(env: Any) -> tuple[bool, str]:
+    base_url = str(getattr(env, "base_url", "") or "")
+    cached = _ENV_PROBE_CACHE.get(base_url)
+    if cached and time.time() - cached[0] < 15:
+        return cached[1], cached[2]
+    parsed = urlparse(base_url)
+    host = parsed.hostname or ""
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    if not host:
+        result = (False, "目标环境 URL 缺少有效主机名。")
+    else:
+        try:
+            with socket.create_connection((host, port), timeout=1.0):
+                pass
+            result = (True, "")
+        except OSError as exc:
+            result = (False, f"目标环境不可达: {host}:{port} ({exc})")
+    _ENV_PROBE_CACHE[base_url] = (time.time(), result[0], result[1])
+    return result
+
+
+def _vnext_run_snapshot(run_id: str) -> dict:
+    sess = RUNS.get(run_id)
+    if sess is not None:
+        with sess.condition:
+            events = list(sess.events)
+        live = sess.status()
+    else:
+        events = LOG_STORE.read_run(run_id)
+        live = None
+    if not events:
+        raise HTTPException(404, {
+            "schema_version": "1.0",
+            "error_code": "run_not_found",
+            "message": f"run_id 不存在或无记录: {run_id}",
+            "evidence": [],
+            "suggested_action": "返回运行历史选择有效记录。",
+        })
+    snapshot = build_run_snapshot(run_id, events=events, live=live)
+    case_name = str(snapshot.get("case_name") or "")
+    if case_name and not case_path_from_name(case_name).exists():
+        display_name = str(snapshot.get("display_name") or case_name)
+        matches = []
+        for path in list_case_files():
+            try:
+                candidate = load_yaml(path)
+            except Exception:
+                continue
+            if isinstance(candidate, dict) and str(candidate.get("name") or "") == display_name:
+                matches.append(case_name_from_path(path))
+        if len(matches) == 1:
+            snapshot["case_name"] = matches[0]
+    return snapshot
+
+
+def _vnext_run_history(limit: int = 50) -> list[dict]:
+    live_ids = set()
+    rows = []
+    for sess in list(RUNS.values())[-limit:][::-1]:
+        live_ids.add(sess.run_id)
+        rows.append(_vnext_run_snapshot(sess.run_id))
+    for item in LOG_STORE.list_runs(limit=limit * 2):
+        run_id = str(item.get("run_id") or "")
+        if not run_id or run_id in live_ids:
+            continue
+        try:
+            rows.append(_vnext_run_snapshot(run_id))
+        except HTTPException:
+            continue
+        if len(rows) >= limit:
+            break
+    return rows[:limit]
+
+
+def _vnext_cancel_run(run_id: str) -> dict:
+    sess = RUNS.get(run_id)
+    if sess is None:
+        raise HTTPException(404, {
+            "schema_version": "1.0",
+            "error_code": "run_not_live",
+            "message": "该运行不存在或已不在当前进程中。",
+            "evidence": [run_id],
+            "suggested_action": "刷新运行状态。",
+        })
+    accepted = sess.request_cancel()
+    return {
+        "schema_version": "1.0",
+        "run_id": run_id,
+        "accepted": accepted,
+        "message": (
+            "已请求在当前步骤边界停止执行。"
+            if accepted else "运行已结束，无需停止。"
+        ),
+    }
+
+
+def _vnext_diagnose_run(run_id: str) -> dict:
+    snapshot = _vnext_run_snapshot(run_id)
+    case_name = str(snapshot.get("case_name") or "")
+    events = (
+        list(RUNS[run_id].events)
+        if run_id in RUNS
+        else LOG_STORE.read_run(run_id)
+    )
+    try:
+        case_detail = _case_workspace_service().detail(
+            case_name,
+            str(snapshot.get("env_id") or ""),
+        )
+    except CaseWorkspaceError as exc:
+        case_detail = {
+            "case": {
+                "name": case_name,
+                "display_name": snapshot.get("display_name") or case_name,
+                "scenario": {},
+            },
+            "field_catalog": [],
+            "readiness": {
+                "state": "unsupported",
+                "title": "用例文件不可用",
+                "allow_run": False,
+                "issues": [{
+                    "code": exc.detail.get("error_code"),
+                    "reason": exc.detail.get("message"),
+                    "suggested_action": "恢复对应 YAML 或从历史证据重新建模。",
+                    "severity": "critical",
+                }],
+            },
+            "technical": {"pageid_source_graph": {}},
+        }
+    case_result = _case_result_from_run_events(run_id, case_name, events)
+    return build_ai_diagnosis(
+        case_detail=case_detail,
+        run_snapshot=snapshot,
+        case_result=case_result,
+    )
+
+
+def _vnext_export_bundle(run_id: str) -> Path:
+    snapshot = _vnext_run_snapshot(run_id)
+    diagnosis = _vnext_diagnose_run(run_id)
+    return export_diagnostic_bundle(
+        skill_path("logs/diagnostic_bundles"),
+        snapshot=snapshot,
+        diagnosis=diagnosis,
+    )
+
+
+APP.include_router(create_workspace_router(
+    case_service_factory=_case_workspace_service,
+    run_snapshot=_vnext_run_snapshot,
+    run_history=_vnext_run_history,
+    cancel_run=_vnext_cancel_run,
+    diagnose_run=_vnext_diagnose_run,
+    export_bundle=_vnext_export_bundle,
+))
 
 
 # ============================================================

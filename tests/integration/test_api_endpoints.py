@@ -295,6 +295,154 @@ class TestRunEndpoints:
         assert resp.status_code == 200
 
 
+class TestVnextWorkspaceEndpoints:
+    @pytest.fixture
+    def client(self):
+        from fastapi.testclient import TestClient
+        from lib.webui.server import APP
+
+        return TestClient(APP)
+
+    @pytest.fixture
+    def workspace_case(self, tmp_path, monkeypatch):
+        from lib.webui import server
+
+        path = tmp_path / "workspace.yaml"
+        path.write_text(
+            yaml.safe_dump(
+                {
+                    "schema_version": "1.0",
+                    "name": "vNext API 用例",
+                    "vars": {"person_name": "录制姓名"},
+                    "vars_meta": {
+                        "person_name": {
+                            "recorded_value": "录制姓名",
+                            "source_step_id": "load",
+                        },
+                    },
+                    "field_catalog": [{
+                        "field_id": "person_name",
+                        "order": 1,
+                        "label": "姓名",
+                        "field_key": "name",
+                        "field_type": "text",
+                        "vars": ["person_name"],
+                        "source_step_id": "load",
+                    }],
+                    "steps": [{
+                        "id": "load",
+                        "type": "invoke",
+                        "ac": "loadData",
+                        "skip_replay": True,
+                    }],
+                    "assertions": [],
+                },
+                allow_unicode=True,
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(server, "case_path_from_name", lambda _name: path)
+        return path
+
+    def test_case_detail_and_variable_save_share_canonical_field_catalog(
+        self, client, workspace_case
+    ):
+        detail = client.get("/api/vnext/cases/workspace/detail")
+        saved = client.put(
+            "/api/vnext/cases/workspace/variables",
+            json={
+                "fields": {
+                    "person_name": {"user_override": "目标姓名"},
+                },
+            },
+        )
+
+        assert detail.status_code == 200
+        assert detail.json()["field_catalog"][0]["recorded_value"] == "录制姓名"
+        assert saved.status_code == 200
+        field = saved.json()["detail"]["field_catalog"][0]
+        assert field["user_override"] == "目标姓名"
+        assert field["final_request_value"] == "目标姓名"
+        persisted = yaml.safe_load(workspace_case.read_text(encoding="utf-8"))
+        assert persisted["vars"]["person_name"] == "目标姓名"
+
+    def test_resolver_endpoint_rejects_non_exact_result(
+        self, client, workspace_case
+    ):
+        response = client.post(
+            "/api/vnext/cases/workspace/resolver/apply",
+            json={
+                "field_id": "person_name",
+                "resolution": {
+                    "resolve_status": "ambiguous",
+                    "candidates": [{"id": "1"}, {"id": "2"}],
+                },
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"]["error_code"] == "resolution_not_exact"
+
+    def test_run_snapshot_and_cancel_endpoint_use_live_replayable_session(
+        self, client, monkeypatch
+    ):
+        from lib.webui import server
+
+        monkeypatch.setattr(
+            server.LOG_STORE,
+            "save_run_event",
+            lambda *_args, **_kwargs: None,
+        )
+        session = server.RunSession("vnext-api-run", "workspace", "target")
+        session.emit("case_start", {"name": "显示名称"})
+        session.emit("step_start", {
+            "id": "load",
+            "label": "加载",
+            "business_stage": "查询",
+        })
+        monkeypatch.setitem(server.RUNS, session.run_id, session)
+
+        snapshot = client.get(f"/api/vnext/runs/{session.run_id}")
+        cancelled = client.post(f"/api/vnext/runs/{session.run_id}/cancel")
+
+        assert snapshot.status_code == 200
+        assert snapshot.json()["case_name"] == "workspace"
+        assert snapshot.json()["events"][0]["seq"] == 1
+        assert cancelled.status_code == 200
+        assert cancelled.json()["accepted"] is True
+        assert session.cancel_event.is_set()
+
+    def test_sse_replays_only_events_after_requested_sequence(
+        self, client, monkeypatch
+    ):
+        from lib.webui import server
+
+        monkeypatch.setattr(
+            server.LOG_STORE,
+            "save_run_event",
+            lambda *_args, **_kwargs: None,
+        )
+        session = server.RunSession("vnext-sse-run", "workspace", "target")
+        session.emit("case_start", {"name": "显示名称"})
+        session.emit("preflight_start", {"id": "preflight_contract"})
+        session.emit("preflight_ok", {"id": "preflight_contract"})
+        session.close()
+        monkeypatch.setitem(server.RUNS, session.run_id, session)
+
+        response = client.get(
+            f"/api/runs/{session.run_id}/events?after_seq=1"
+        )
+
+        assert response.status_code == 200
+        assert "id: 1\n" not in response.text
+        assert "id: 2\n" in response.text
+        assert "event: preflight_start" in response.text
+        assert "id: 3\n" in response.text
+        assert "event: preflight_ok" in response.text
+        assert "event: close" in response.text
+
+
 class TestBatchEndpoints:
     """批量操作端点测试"""
     

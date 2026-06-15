@@ -2678,6 +2678,56 @@ class TestStepHandlers:
         assert result.runtime_evidence["capability"]["write_mode"] == "read_only"
         assert any(event == "preflight_ok" and payload.get("id") == "preflight_contract" for event, payload in events)
 
+    def test_run_case_cancels_at_step_boundary_before_assertions(self, monkeypatch):
+        events = []
+        checks = iter([False, True, True])
+
+        class FakeSession:
+            user_id = "user-1"
+            root_base_id = "a" * 32
+            root_page_id = "root" + root_base_id
+
+        class FakeReplay:
+            def __init__(self, session, sign_required=True):
+                self.s = session
+                self.page_ids = {}
+
+            def init_root(self):
+                return self.s.root_page_id
+
+        monkeypatch.setattr(runner_mod, "login", lambda *args, **kwargs: FakeSession())
+        monkeypatch.setattr(runner_mod, "CosmicFormReplay", FakeReplay)
+        case = {
+            "name": "cancel-at-boundary",
+            "env": {
+                "base_url": "https://example.test",
+                "username": "user",
+                "password": "pw",
+                "datacenter_id": "dc",
+            },
+            "steps": [{
+                "id": "would-run",
+                "type": "invoke",
+                "ac": "loadData",
+                "skip_replay": True,
+            }],
+            "assertions": [{"type": "no_error_actions", "last_step": True}],
+        }
+
+        result = run_case(
+            case,
+            on_event=lambda event, payload: events.append((event, payload)),
+            cancel_check=lambda: next(checks, True),
+        )
+
+        assert result.passed is False
+        assert result.steps[-1]["id"] == "execution_cancelled"
+        assert result.assertions == []
+        assert any(event == "case_cancelled" for event, _payload in events)
+        done = next(payload for event, payload in events if event == "case_done")
+        assert done["cancelled"] is True
+        assert done["result_evidence"]["outcome"] == "cancelled"
+
     def test_upload_file_handler_calls_replay_and_records_runtime_upload(self, tmp_path):
         uploaded = tmp_path / "salary.xlsx"
         uploaded.write_bytes(b"demo")

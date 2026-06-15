@@ -19,38 +19,64 @@ def test_vnext_is_modular_and_keeps_legacy_as_explicit_fallback():
     app = _vnext_file("js/app.js")
 
     assert 'href="/legacy"' in html
-    assert 'src="/static/vnext/js/app.js"' in html
-    assert 'from "./state.js"' in app
-    assert 'from "./api-client.js"' in app
-    assert "technical-drawer.js" in app
+    assert 'import("/static/vnext/js/app.js' in html
+    assert 'from "./state.js?' in app
+    assert 'from "./api-client.js?' in app
+    assert "case-workspace.js" in app
+    assert "variable-workspace.js" in app
+    assert "execution-center.js" in app
+    assert "log-viewer.js" in app
+    assert "diagnosis-workspace.js" in app
 
 
 def test_vnext_uses_one_field_catalog_value_lineage_and_persisted_validation_points():
-    fields = _vnext_file("js/components/field-editor.js")
-    validation = _vnext_file("js/components/validation-points.js")
-    workspace = _vnext_file("js/workspaces/import-workspace.js")
+    fields = _vnext_file("js/variables/variable-workspace.js")
+    cases = _vnext_file("js/cases/case-workspace.js")
+    app = _vnext_file("js/app.js")
 
-    assert "preview.field_catalog" in fields
+    assert "state.caseDetail?.field_catalog" in fields
     assert "录制值" in fields
-    assert "用户值" in fields
+    assert "用户覆盖" in fields
     assert "目标环境解析" in fields
-    assert "最终值" in fields
-    assert "必需" in validation
-    assert "用户启用" in validation
-    assert "建议" in validation
-    assert "技术契约" in validation
-    assert "validation_point_overrides: state.validationDrafts" in workspace
+    assert "最终生效值" in fields
+    assert "recorded_value → user_override → environment_resolved_value → final_request_value" in fields
+    assert "必需" in cases
+    assert "用户启用" in cases
+    assert "建议" in cases
+    assert "技术契约" in cases
+    assert "validation_points" in app
 
 
 def test_vnext_result_has_one_conclusion_and_action_backed_by_result_evidence():
-    result = _vnext_file("js/components/result-summary.js")
+    result = _vnext_file("js/execution/execution-center.js")
+    diagnosis = _vnext_file("js/diagnosis/diagnosis-workspace.js")
     app = _vnext_file("js/app.js")
 
-    assert "result.result_evidence" in result
-    assert "data-result-action" in result
-    assert "write_unverified" in result
-    assert "business_failed" in result
-    assert "api.confirmWrite" in app
+    assert "run.primary_action" in result
+    assert "request_success" in result
+    assert "action_success" in result
+    assert "contract_passed" in result
+    assert "write_verified" in result
+    assert "requires_user_confirmation" not in diagnosis
+    assert "confirm-repair" in diagnosis
+    assert "api.applyRepair" in app
+
+
+def test_vnext_supports_resumable_execution_cancel_logs_and_evidence_bound_ai():
+    api = _vnext_file("js/api-client.js")
+    app = _vnext_file("js/app.js")
+    logs = _vnext_file("js/logs/log-viewer.js")
+    diagnosis = _vnext_file("js/diagnosis/diagnosis-workspace.js")
+
+    assert "after_seq" in app
+    assert "EventSource" in app
+    assert "api.cancelRun" in app
+    assert "run.events?.at(-1)?.seq" in app
+    assert "导出诊断包" in logs
+    assert "evidence_ref" in logs
+    assert "失败结论" in diagnosis
+    assert "应用前 Diff" in diagnosis
+    assert "我已审查差异和风险" in diagnosis
 
 
 def test_har_preview_exposes_ir_write_contract_coverage():
