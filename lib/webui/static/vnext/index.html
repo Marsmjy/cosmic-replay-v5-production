@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosmic Replay vNext</title>
+  <link rel="stylesheet" href="/static/vnext/styles/tokens.css">
+  <link rel="stylesheet" href="/static/vnext/styles/workspace.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">CR</span>
+        <div>
+          <strong>Cosmic Replay</strong>
+          <span>vNext 工作台</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <label class="inline-field">
+          <span>目标环境</span>
+          <select id="environment-select" aria-label="目标环境"></select>
+        </label>
+        <span id="api-health" class="status-dot">正在连接</span>
+        <a class="text-link" href="/legacy">旧版页面</a>
+      </div>
+    </header>
+
+    <aside class="workflow-rail" aria-label="工作流程">
+      <button class="workflow-step is-active" data-stage="import">
+        <span>1</span><b>导入与建模</b><small>识别场景与业务字段</small>
+      </button>
+      <button class="workflow-step" data-stage="values">
+        <span>2</span><b>维护业务值</b><small>确认目标环境生效值</small>
+      </button>
+      <button class="workflow-step" data-stage="readiness">
+        <span>3</span><b>执行前检查</b><small>安全门槛与支持范围</small>
+      </button>
+      <button class="workflow-step" data-stage="run">
+        <span>4</span><b>执行</b><small>按业务阶段回放</small>
+      </button>
+      <button class="workflow-step" data-stage="result">
+        <span>5</span><b>业务结果</b><small>契约、回查与下一步</small>
+      </button>
+    </aside>
+
+    <main class="workspace">
+      <section class="workspace-header">
+        <div>
+          <p class="eyebrow" id="workspace-eyebrow">导入与建模</p>
+          <h1 id="workspace-title">从一条真实 HAR 建立可执行业务模型</h1>
+          <p id="workspace-subtitle">录制证据保持不变，业务规则和最终请求值可追踪。</p>
+        </div>
+        <div id="workspace-actions" class="workspace-actions"></div>
+      </section>
+
+      <div id="notice-region" class="notice-region" aria-live="polite"></div>
+      <section id="workspace-content" class="workspace-content"></section>
+    </main>
+
+    <aside id="inspector" class="inspector" aria-label="状态摘要"></aside>
+
+    <section id="technical-drawer" class="technical-drawer" aria-label="技术诊断"></section>
+  </div>
+  <script type="module" src="/static/vnext/js/app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,1513 @@
+{
+  "business_type": "入职流程",
+  "case": {
+    "assertion_count": 2,
+    "assertions": [
+      {
+        "step": "click_barstart",
+        "type": "no_save_failure"
+      },
+      {
+        "step": "click_barconfirm",
+        "type": "no_error_actions"
+      }
+    ],
+    "environment_resolvers": [
+      "pick_chgreason_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version",
+      "pick_certificatetype_id|lookup|getLookUpList||exactly_one|lookup|number|name|id|version",
+      "pick_gender_id|lookup|getLookUpList||exactly_one|lookup|number|name|id|version",
+      "pick_ba_e_laborrelstatus_id|lookup|getLookUpList||exactly_one|lookup|number|name|id|version",
+      "pick_ba_e_enterprise_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version",
+      "pick_ba_po_adminorg_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version",
+      "pick_ba_po_position_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version",
+      "date_effectdatebak|literal_date|update_fields||literal|lookup|number|name|id|version"
+    ],
+    "field_catalog": {
+      "count": 11,
+      "signatures": [
+        "1|field_hom_onbrdinfo_form_ba_em_name|multi_lang_text|vars|test_name|",
+        "2|field_hom_onbrdinfo_entry_certificatetype|basedata|pick_fields||pick_certificatetype_id",
+        "3|field_hom_onbrdinfo_form_certificatenumber|text|vars|test_cert_no|",
+        "4|field_hom_onbrdinfo_entry_gender|basedata|pick_fields||pick_gender_id",
+        "5|field_hom_onbrdinfo_form_phone|text|vars|test_phone|",
+        "6|field_hom_onbrdinfo_entry_ba_e_laborrelstatus|basedata|pick_fields||pick_ba_e_laborrelstatus_id",
+        "7|field_hom_onbrdinfo_form_ba_em_empnumber|text|vars|test_number|",
+        "8|field_hom_onbrdinfo_entry_ba_e_enterprise|basedata|pick_fields||pick_ba_e_enterprise_id",
+        "9|field_hom_onbrdinfo_entry_ba_po_adminorg|basedata|pick_fields||pick_ba_po_adminorg_id",
+        "10|field_hom_onbrdinfo_entry_ba_po_position|basedata|pick_fields||pick_ba_po_position_id",
+        "11|field_hom_onbrdinfo_form_effectdatebak|date|pick_fields||date_effectdatebak"
+      ]
+    },
+    "generation_gate": {
+      "allow_generate": true,
+      "allow_run": true,
+      "blocker_codes": [],
+      "decision": "review"
+    },
+    "main_form_id": "hom_onbrdinfo",
+    "name": "regression_05_onboard_confirm",
+    "pageid_source_graph": {
+      "summary": {
+        "l2_consumer_count": 4,
+        "l3_consumer_count": 28,
+        "node_count": 40,
+        "recorded_source_retained_count": 33,
+        "safe_recovery_count": 4,
+        "unsafe_consumer_count": 0
+      },
+      "unsafe_consumer_step_ids": []
+    },
+    "pageid_trace": {
+      "steps": [
+        {
+          "ac": "appItemClick",
+          "app_id": "bos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "bos_portal_myapp_new",
+          "har_pageid_type": "L1_or_L3",
+          "method": "appItemClick",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "appItemClick_31",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "bos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "home_page",
+          "har_pageid_type": "L0",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "appItemClick_31",
+          "risk_codes": [],
+          "step_id": "selectTab_33",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "loadData",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "selectTab_33",
+          "risk_codes": [],
+          "step_id": "load_apphome",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "bos_card_quicklaunch",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "harvested_l3_guard",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": false,
+          "recorded_pageid_source_step_id": "clientCallBack_35",
+          "risk_codes": [],
+          "step_id": "load_card_quicklaunch",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_wbwaitin",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "harvested_l3_guard",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": false,
+          "recorded_pageid_source_step_id": "clientCallBack_35",
+          "risk_codes": [],
+          "step_id": "load_wbwaitin",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_wbcalendar",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "harvested_l3_guard",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": false,
+          "recorded_pageid_source_step_id": "clientCallBack_35",
+          "risk_codes": [],
+          "step_id": "load_wbcalendar",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_wbwarning",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "harvested_l3_guard",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": false,
+          "recorded_pageid_source_step_id": "clientCallBack_35",
+          "risk_codes": [],
+          "step_id": "load_wbwarning",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "treeMenuClick",
+          "app_id": "hom",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "hom_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "treeMenuClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "selectTab_33",
+          "risk_codes": [],
+          "step_id": "treeMenuClick_42",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "selectTab_33",
+          "risk_codes": [],
+          "step_id": "selectTab_43",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "hom_persononbrdhandlebody",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "treeMenuClick_42",
+          "risk_codes": [],
+          "step_id": "load_persononbrdhandlebody",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "missing",
+          "method": "",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "open_onbrd",
+          "step_type": "open_form"
+        },
+        {
+          "ac": "getTelViaList",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "getTelViaList",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "getTelViaList_51",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "fill_ba_em_name",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "pick_certificatetype",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "fill_certificatenumber",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "pick_gender",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "fill_phone",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "pick_ba_e_laborrelstatus",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "fill_ba_em_empnumber",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "pick_ba_e_enterprise",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "pick_ba_po_adminorg",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "pick_ba_po_position",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "changeYear",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "changeYear",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "changeYear_62",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdinfo",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody",
+          "risk_codes": [],
+          "step_id": "fill_effectdatebak",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "startupflow",
+          "app_id": "hom",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "hom_persononbrdhandlebody",
+          "har_pageid_type": "L2",
+          "method": "itemClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "treeMenuClick_42",
+          "risk_codes": [],
+          "step_id": "click_barstart",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "afterConfirm",
+          "app_id": "hom",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "hom_persononbrdhandlebody",
+          "har_pageid_type": "L2",
+          "method": "afterConfirm",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "treeMenuClick_42",
+          "risk_codes": [],
+          "step_id": "afterConfirm_65",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "selectTab_33",
+          "risk_codes": [],
+          "step_id": "selectTab_70",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_activityoverview",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "load_persononbrdhandlebody_2",
+          "risk_codes": [],
+          "step_id": "load_activityoverview",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "doconfirm",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_persononbrdhandlebody",
+          "har_pageid_type": "L1_or_L3",
+          "method": "itemClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "afterConfirm_65",
+          "risk_codes": [],
+          "step_id": "click_barconfirm",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "click",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_onbrdconfirmsingle",
+          "har_pageid_type": "L1_or_L3",
+          "method": "click",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_barconfirm",
+          "risk_codes": [],
+          "step_id": "click_76",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hom",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hom_activityoverview",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_76",
+          "risk_codes": [],
+          "step_id": "load_activityoverview_2",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "getFrequentData",
+          "app_id": "bos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "bos_portal_myapp_new",
+          "har_pageid_type": "L1_or_L3",
+          "method": "getFrequentData",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "getFrequentData_84",
+          "step_type": "invoke"
+        }
+      ],
+      "summary": {
+        "expected_roles": {
+          "L1": 1,
+          "L2": 4,
+          "L2_or_L3": 8,
+          "L3": 28
+        },
+        "preserve_l2_steps": 3,
+        "risk_counts": {},
+        "risk_level": "none",
+        "total_steps": 41
+      }
+    },
+    "pick_fields": [
+      {
+        "app_id": "hom",
+        "auto_resolve": false,
+        "env_sensitive": "medium",
+        "field_key": "effectdatebak",
+        "form_id": "hom_onbrdinfo",
+        "label": "入职日期",
+        "name": "date_effectdatebak",
+        "resolve_by": "",
+        "resolve_status": "manual",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 10
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 10
+        }
+      },
+      {
+        "app_id": "hom",
+        "auto_resolve": true,
+        "env_sensitive": "medium",
+        "field_key": "ba_e_enterprise",
+        "form_id": "hom_onbrdinfo",
+        "label": "企业",
+        "name": "pick_ba_e_enterprise_id",
+        "resolve_by": "value_code",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 9
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 8
+        }
+      },
+      {
+        "app_id": "hom",
+        "auto_resolve": false,
+        "env_sensitive": "low",
+        "field_key": "ba_e_laborrelstatus",
+        "form_id": "hom_onbrdinfo",
+        "label": "用工状态",
+        "name": "pick_ba_e_laborrelstatus_id",
+        "resolve_by": "",
+        "resolve_status": "manual",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 4
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 2
+        }
+      },
+      {
+        "app_id": "hom",
+        "auto_resolve": true,
+        "env_sensitive": "medium",
+        "field_key": "ba_po_adminorg",
+        "form_id": "hom_onbrdinfo",
+        "label": "行政组织",
+        "name": "pick_ba_po_adminorg_id",
+        "resolve_by": "value_code",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 9
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 4
+        }
+      },
+      {
+        "app_id": "hom",
+        "auto_resolve": true,
+        "env_sensitive": "medium",
+        "field_key": "ba_po_position",
+        "form_id": "hom_onbrdinfo",
+        "label": "职位",
+        "name": "pick_ba_po_position_id",
+        "resolve_by": "value_code",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 5
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 5
+        }
+      },
+      {
+        "app_id": "hom",
+        "auto_resolve": false,
+        "env_sensitive": "low",
+        "field_key": "certificatetype",
+        "form_id": "hom_onbrdinfo",
+        "label": "证件类型",
+        "name": "pick_certificatetype_id",
+        "resolve_by": "",
+        "resolve_status": "manual",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 4
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 2
+        }
+      },
+      {
+        "app_id": "hom",
+        "auto_resolve": true,
+        "env_sensitive": "high",
+        "field_key": "chgreason",
+        "form_id": "hom_onbrdinfo",
+        "label": "变动原因",
+        "name": "pick_chgreason_id",
+        "resolve_by": "value_code",
+        "resolve_status": "missing_required_context",
+        "value_id_shape": {
+          "kind": "empty"
+        },
+        "value_name_shape": {
+          "kind": "empty"
+        }
+      },
+      {
+        "app_id": "hom",
+        "auto_resolve": false,
+        "env_sensitive": "low",
+        "field_key": "gender",
+        "form_id": "hom_onbrdinfo",
+        "label": "性别",
+        "name": "pick_gender_id",
+        "resolve_by": "",
+        "resolve_status": "manual",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 4
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 1
+        }
+      }
+    ],
+    "scenario_kind": "submit",
+    "scenario_stages": [
+      "submit",
+      "confirm"
+    ],
+    "step_count": 41,
+    "steps": [
+      {
+        "app_id": "bos",
+        "form_id": "bos_portal_myapp_new",
+        "id": "open_portal",
+        "optional": false,
+        "target": "",
+        "type": "open_form"
+      },
+      {
+        "ac": "appItemClick",
+        "app_id": "bos",
+        "args_count": 1,
+        "form_id": "bos_portal_myapp_new",
+        "id": "appItemClick_31",
+        "key": "appnavigationmenuap",
+        "method": "appItemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "bos",
+        "args_count": 1,
+        "form_id": "home_page",
+        "id": "selectTab_33",
+        "key": "tabap",
+        "method": "selectTab",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_apphome",
+        "id": "load_apphome",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "bos_card_quicklaunch",
+        "id": "load_card_quicklaunch",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_wbwaitin",
+        "id": "load_wbwaitin",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_wbcalendar",
+        "id": "load_wbcalendar",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_wbwarning",
+        "id": "load_wbwarning",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "treeMenuClick",
+        "app_id": "hom",
+        "args_count": 2,
+        "form_id": "hom_apphome",
+        "id": "treeMenuClick_42",
+        "key": "navigationbar",
+        "method": "treeMenuClick",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "hom",
+        "args_count": 1,
+        "form_id": "hom_apphome",
+        "id": "selectTab_43",
+        "key": "_submaintab_",
+        "method": "selectTab",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_persononbrdhandlebody",
+        "id": "load_persononbrdhandlebody",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrddetailhead",
+        "id": "load_onbrddetailhead",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "app_id": "hom",
+        "form_id": "hom_onbrdinfo",
+        "id": "open_onbrd",
+        "optional": false,
+        "target": "",
+        "type": "open_form"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrdinfo",
+        "id": "load_onbrd",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "getTelViaList",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrdinfo",
+        "id": "getTelViaList_51",
+        "key": "phone",
+        "method": "getTelViaList",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "app_id": "hom",
+        "fields": [
+          {
+            "field_key": "ba_em_name",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          }
+        ],
+        "form_id": "hom_onbrdinfo",
+        "id": "fill_ba_em_name",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "app_id": "hom",
+        "field_key": "certificatetype",
+        "form_id": "hom_onbrdinfo",
+        "id": "pick_certificatetype",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "hom",
+        "fields": [
+          {
+            "field_key": "certificatenumber",
+            "value_shape": {
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
+            }
+          }
+        ],
+        "form_id": "hom_onbrdinfo",
+        "id": "fill_certificatenumber",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "app_id": "hom",
+        "field_key": "gender",
+        "form_id": "hom_onbrdinfo",
+        "id": "pick_gender",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "hom",
+        "fields": [
+          {
+            "field_key": "phone",
+            "value_shape": {
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
+            }
+          }
+        ],
+        "form_id": "hom_onbrdinfo",
+        "id": "fill_phone",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "app_id": "hom",
+        "field_key": "ba_e_laborrelstatus",
+        "form_id": "hom_onbrdinfo",
+        "id": "pick_ba_e_laborrelstatus",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "hom",
+        "fields": [
+          {
+            "field_key": "ba_em_empnumber",
+            "value_shape": {
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
+            }
+          }
+        ],
+        "form_id": "hom_onbrdinfo",
+        "id": "fill_ba_em_empnumber",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "app_id": "hom",
+        "field_key": "ba_e_enterprise",
+        "form_id": "hom_onbrdinfo",
+        "id": "pick_ba_e_enterprise",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "hom",
+        "field_key": "ba_po_adminorg",
+        "form_id": "hom_onbrdinfo",
+        "id": "pick_ba_po_adminorg",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "hom",
+        "field_key": "ba_po_position",
+        "form_id": "hom_onbrdinfo",
+        "id": "pick_ba_po_position",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "ac": "changeYear",
+        "app_id": "hom",
+        "args_count": 1,
+        "form_id": "hom_onbrdinfo",
+        "id": "changeYear_62",
+        "key": "effectdatebak",
+        "method": "changeYear",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "app_id": "hom",
+        "fields": [
+          {
+            "field_key": "effectdatebak",
+            "value_shape": {
+              "kind": "literal",
+              "length": 10
+            }
+          }
+        ],
+        "form_id": "hom_onbrdinfo",
+        "id": "fill_effectdatebak",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "ac": "startupflow",
+        "app_id": "hom",
+        "args_count": 2,
+        "form_id": "hom_persononbrdhandlebody",
+        "id": "click_barstart",
+        "key": "toolbarap",
+        "method": "itemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "afterConfirm",
+        "app_id": "hom",
+        "args_count": 3,
+        "form_id": "hom_persononbrdhandlebody",
+        "id": "afterConfirm_65",
+        "key": "",
+        "method": "afterConfirm",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_persononbrdhandlebody",
+        "id": "load_persononbrdhandlebody_2",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "hom",
+        "args_count": 1,
+        "form_id": "hom_apphome",
+        "id": "selectTab_70",
+        "key": "_submaintab_",
+        "method": "selectTab",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrddetailhead",
+        "id": "load_onbrddetailhead_2",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrdinfo",
+        "id": "load_onbrd_2",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_activityoverview",
+        "id": "load_activityoverview",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "doconfirm",
+        "app_id": "hom",
+        "args_count": 2,
+        "form_id": "hom_persononbrdhandlebody",
+        "id": "click_barconfirm",
+        "key": "toolbarap",
+        "method": "itemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrdconfirmsingle",
+        "id": "load_onbrdconfirmsingle",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "click",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrdconfirmsingle",
+        "id": "click_76",
+        "key": "btn_confirm",
+        "method": "click",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrddetailhead",
+        "id": "load_onbrddetailhead_3",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_activityoverview",
+        "id": "load_activityoverview_2",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hom",
+        "args_count": 0,
+        "form_id": "hom_onbrdinfo",
+        "id": "load_onbrd_3",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "getFrequentData",
+        "app_id": "bos",
+        "args_count": 0,
+        "form_id": "bos_portal_myapp_new",
+        "id": "getFrequentData_84",
+        "key": "appnavigationmenuap",
+        "method": "getFrequentData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      }
+    ],
+    "target_forms": [],
+    "vars": [
+      {
+        "label": "证件号",
+        "name": "test_cert_no",
+        "value_shape": {
+          "kind": "template",
+          "tokens": [
+            "${rand:*}"
+          ]
+        }
+      },
+      {
+        "label": "名称",
+        "name": "test_name",
+        "value_shape": {
+          "kind": "template",
+          "tokens": [
+            "${rand:*}"
+          ]
+        }
+      },
+      {
+        "label": "编号",
+        "name": "test_number",
+        "value_shape": {
+          "kind": "template",
+          "tokens": [
+            "${rand:*}"
+          ]
+        }
+      },
+      {
+        "label": "手机号",
+        "name": "test_phone",
+        "value_shape": {
+          "kind": "template",
+          "tokens": [
+            "${rand:*}"
+          ]
+        }
+      }
+    ]
+  },
+  "preview": {
+    "components": {
+      "coverage_percent": 78,
+      "handler_ids": [
+        "form_load",
+        "dialog_confirm",
+        "portal_navigation",
+        "generic_safe_invoke",
+        "open_form",
+        "basedata_selector",
+        "field_update",
+        "geo_lookup",
+        "tree_navigation",
+        "persistence_action",
+        "list_navigation",
+        "entry_table",
+        "lookup_query",
+        "tree_context"
+      ],
+      "partial_steps": 81,
+      "risk_level": "medium",
+      "supported_steps": 106,
+      "total_steps": 187,
+      "unsupported_steps": 0
+    },
+    "detected_vars": [
+      "test_cert_no",
+      "test_name",
+      "test_number",
+      "test_phone"
+    ],
+    "field_catalog": {
+      "count": 11,
+      "field_ids": [
+        "field_hom_onbrdinfo_form_ba_em_name",
+        "field_hom_onbrdinfo_entry_certificatetype",
+        "field_hom_onbrdinfo_form_certificatenumber",
+        "field_hom_onbrdinfo_entry_gender",
+        "field_hom_onbrdinfo_form_phone",
+        "field_hom_onbrdinfo_entry_ba_e_laborrelstatus",
+        "field_hom_onbrdinfo_form_ba_em_empnumber",
+        "field_hom_onbrdinfo_entry_ba_e_enterprise",
+        "field_hom_onbrdinfo_entry_ba_po_adminorg",
+        "field_hom_onbrdinfo_entry_ba_po_position",
+        "field_hom_onbrdinfo_form_effectdatebak"
+      ],
+      "unknown_count": 0
+    },
+    "generation_gate": {
+      "allow_generate": true,
+      "allow_run": true,
+      "blocker_codes": [],
+      "decision": "review",
+      "preflight_decision": "review"
+    },
+    "ir_alignment": {
+      "grade": "A",
+      "issue_codes": [],
+      "risk_level": "low",
+      "warning_codes": []
+    },
+    "main_form_id": "hspm_ermanfilereform",
+    "maintainability": {
+      "auto_resolve_pick_count": 4,
+      "business_flow_count": 68,
+      "business_flow_step_count": 187,
+      "detected_var_count": 4,
+      "high_env_sensitive_count": 1,
+      "ir_interaction_bridge_status": "ready_with_warnings",
+      "ir_interaction_count": 18,
+      "ir_interaction_high_risk_uncovered_count": 0,
+      "ir_interaction_uncovered_count": 7,
+      "ir_write_anchor_count": 4,
+      "ir_write_anchor_uncovered_count": 0,
+      "ir_write_bridge_status": "ready",
+      "ir_write_contract_missing_count": 0,
+      "pick_field_count": 8,
+      "response_contract_counts": {
+        "advisory": 0,
+        "business": 0,
+        "critical": 4
+      },
+      "response_signature_step_count": 4
+    },
+    "pageid_alignment": {
+      "grade": "A",
+      "issue_codes": [],
+      "preserve_l2_count": 0,
+      "recorded_cross_form_count": 0,
+      "recorded_exact_link_count": 197,
+      "recorded_external_root_count": 0,
+      "recorded_filtered_source_count": 54,
+      "recorded_reuse_after_close_count": 1,
+      "risk_level": "low"
+    },
+    "pick_field_keys": [
+      "ba_e_enterprise",
+      "ba_e_laborrelstatus",
+      "ba_po_adminorg",
+      "ba_po_position",
+      "certificatetype",
+      "chgreason",
+      "effectdatebak",
+      "gender"
+    ],
+    "quality": {
+      "blocking": false,
+      "grade": "A",
+      "issue_codes": [
+        "component_coverage_low",
+        "unknown_actions"
+      ],
+      "score": 98
+    },
+    "scenario_kind": "submit",
+    "scenario_stages": [
+      "submit",
+      "confirm"
+    ]
+  },
+  "sample_id": "05_onboard_confirm",
+  "schema_version": 2,
+  "source_har": "preview_1778835327_入职申请到确认入职.har",
+  "source_sha256": "7a64947392f6bac00ba86d9306bcb0a43eb988f1749e021fb654c5559559564e",
+  "summary_hash": "2acfd128b0b7103c9bda776aba9a281fdad9a212dafd4b955e177c0a3bf9ad2e",
+  "title": "入职申请到确认入职"
+}

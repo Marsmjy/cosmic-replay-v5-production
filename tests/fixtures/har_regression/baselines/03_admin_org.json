@@ -1,0 +1,1362 @@
+{
+  "business_type": "组织维护",
+  "case": {
+    "assertion_count": 2,
+    "assertions": [
+      {
+        "step": "click_new_save",
+        "type": "no_save_failure"
+      },
+      {
+        "step": "click_new_save",
+        "type": "no_error_actions"
+      }
+    ],
+    "environment_resolvers": [
+      "env_click_addnew_treeview_focus|manual|||literal|lookup|number|name|id|version",
+      "pick_org_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version",
+      "pick_changescene_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version",
+      "date_bsed|literal_date|update_fields||literal|lookup|number|name|id|version",
+      "pick_adminorgtype_id|lookup|getLookUpList|value_name|exactly_one|lookup|number|name|id|version",
+      "pick_parentorg_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version",
+      "pick_otclassify_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version"
+    ],
+    "field_catalog": {
+      "count": 9,
+      "signatures": [
+        "1|field_haos_adminorgdetail_form_org|basedata|pick_fields||pick_org_id",
+        "2|field_haos_adminorgdetail_entry_changescene|basedata|pick_fields||pick_changescene_id",
+        "3|field_haos_adminorgdetail_form_bsed|date|pick_fields||date_bsed",
+        "4|field_haos_adminorgdetail_form_number|text|vars|test_number|",
+        "5|field_haos_adminorgdetail_form_name|multi_lang_text|vars|test_name|",
+        "6|field_haos_adminorgdetail_entry_adminorgtype|basedata|pick_fields||pick_adminorgtype_id",
+        "7|field_haos_adminorgdetail_form_parentorg|basedata|pick_fields||pick_parentorg_id",
+        "8|field_haos_adminorgdetail_form_otclassify|basedata|pick_fields||pick_otclassify_id",
+        "9|control_haos_adminorgdetail_form_tbmain_save_itemclick|button|structural||"
+      ]
+    },
+    "generation_gate": {
+      "allow_generate": true,
+      "allow_run": true,
+      "blocker_codes": [],
+      "decision": "ready"
+    },
+    "main_form_id": "haos_adminorgdetail",
+    "name": "regression_03_admin_org",
+    "pageid_source_graph": {
+      "summary": {
+        "l2_consumer_count": 8,
+        "l3_consumer_count": 22,
+        "node_count": 35,
+        "recorded_source_retained_count": 27,
+        "safe_recovery_count": 2,
+        "unsafe_consumer_count": 0
+      },
+      "unsafe_consumer_step_ids": []
+    },
+    "pageid_trace": {
+      "steps": [
+        {
+          "ac": "menuItemClick",
+          "app_id": "bos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "bos_portal_myapp_new",
+          "har_pageid_type": "L1_or_L3",
+          "method": "menuItemClick",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "menuItemClick_32",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "bos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "home_page",
+          "har_pageid_type": "L0",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "menuItemClick_32",
+          "risk_codes": [],
+          "step_id": "selectTab_34",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "homs",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "homs_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "loadData",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "selectTab_34",
+          "risk_codes": [],
+          "step_id": "load_apphome",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "compound_root",
+          "method": "loadData",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "menuItemClick_32",
+          "risk_codes": [],
+          "step_id": "load_adminorg",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "homs",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "bos_card_quicklaunch",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "harvested_l3_guard",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": false,
+          "recorded_pageid_source_step_id": "clientCallBack_36",
+          "risk_codes": [],
+          "step_id": "load_card_quicklaunch",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "addnew",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L2",
+          "method": "itemClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "menuItemClick_32",
+          "risk_codes": [],
+          "step_id": "click_addnew",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "homs",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "homs_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "selectTab_49",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "getTelViaList",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "getTelViaList",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "getTelViaList_52",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "getTelViaList",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "getCountrys",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "getTelViaList_53",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "getTelViaList",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "getProvincesByCountryId",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "getTelViaList_54",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "",
+          "app_id": "bos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hbp_reviselogpage",
+          "har_pageid_type": "missing",
+          "method": "",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "open_reviselogpage",
+          "step_type": "open_form"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "hbp",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hbp_reviselogpage",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "load_reviselogpage",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "missing",
+          "method": "",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "pick_org_ctx",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "pick_changescene",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "changeYear",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "changeYear",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "changeYear_57",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "fill_bsed_etc",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "pick_adminorgtype",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "missing",
+          "method": "",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "pick_parentorg_ctx",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "missing",
+          "method": "",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "pick_otclassify_ctx",
+          "step_type": "pick_basedata"
+        },
+        {
+          "ac": "save",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "itemClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "click_new_save",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "close",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L1_or_L3",
+          "method": "itemClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "click_bar_close",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "homs",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "homs_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_addnew",
+          "risk_codes": [],
+          "step_id": "selectTab_64",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "commonSearch",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L2",
+          "method": "commonSearch",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_bar_close",
+          "risk_codes": [],
+          "step_id": "commonSearch_67",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "entryRowClick",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L2",
+          "method": "entryRowClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_bar_close",
+          "risk_codes": [],
+          "step_id": "entryRowClick_68",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "entryRowClick",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L2",
+          "method": "entryRowClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_bar_close",
+          "risk_codes": [],
+          "step_id": "entryRowClick_69",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "entryRowClick",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L2",
+          "method": "entryRowClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_bar_close",
+          "risk_codes": [],
+          "step_id": "entryRowClick_70",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "entryRowClick",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "L2",
+          "method": "hyperLinkClick",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_bar_close",
+          "risk_codes": [],
+          "step_id": "entryRowClick_71",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "homs",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "homs_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "entryRowClick_70",
+          "risk_codes": [],
+          "step_id": "selectTab_73",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "getCountrys",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "compound_root",
+          "method": "getCountrys",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "entryRowClick_70",
+          "risk_codes": [],
+          "step_id": "getCountrys_75",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "getCountrys",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_adminorgdetail",
+          "har_pageid_type": "compound_root",
+          "method": "getProvincesByCountryId",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "entryRowClick_70",
+          "risk_codes": [],
+          "step_id": "getCountrys_76",
+          "step_type": "invoke"
+        }
+      ],
+      "summary": {
+        "expected_roles": {
+          "L1": 1,
+          "L2": 8,
+          "L2_or_L3": 5,
+          "L3": 22
+        },
+        "preserve_l2_steps": 7,
+        "risk_counts": {},
+        "risk_level": "none",
+        "total_steps": 36
+      }
+    },
+    "pick_fields": [
+      {
+        "app_id": "haos",
+        "auto_resolve": false,
+        "env_sensitive": "medium",
+        "field_key": "bsed",
+        "form_id": "haos_adminorgdetail",
+        "label": "组织变动生效日期",
+        "name": "date_bsed",
+        "resolve_by": "",
+        "resolve_status": "manual",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 10
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 10
+        }
+      },
+      {
+        "app_id": "haos",
+        "auto_resolve": false,
+        "env_sensitive": "high",
+        "field_key": "treeview.focus.id",
+        "form_id": "haos_adminorgdetail",
+        "label": "新增上下文组织",
+        "name": "env_click_addnew_treeview_focus",
+        "resolve_by": "",
+        "resolve_status": "manual",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 6
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 10
+        }
+      },
+      {
+        "app_id": "haos",
+        "auto_resolve": true,
+        "env_sensitive": "low",
+        "field_key": "adminorgtype",
+        "form_id": "haos_adminorgdetail",
+        "label": "行政组织类型",
+        "name": "pick_adminorgtype_id",
+        "resolve_by": "value_name",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 4
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 2
+        }
+      },
+      {
+        "app_id": "haos",
+        "auto_resolve": true,
+        "env_sensitive": "low",
+        "field_key": "changescene",
+        "form_id": "haos_adminorgdetail",
+        "label": "组织变动场景",
+        "name": "pick_changescene_id",
+        "resolve_by": "value_code",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 4
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 4
+        }
+      },
+      {
+        "app_id": "haos",
+        "auto_resolve": true,
+        "env_sensitive": "medium",
+        "field_key": "org",
+        "form_id": "haos_adminorgdetail",
+        "label": "组织",
+        "name": "pick_org_id",
+        "resolve_by": "value_code",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 2
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 10
+        }
+      },
+      {
+        "app_id": "haos",
+        "auto_resolve": true,
+        "env_sensitive": "low",
+        "field_key": "otclassify",
+        "form_id": "haos_adminorgdetail",
+        "label": "组织分类",
+        "name": "pick_otclassify_id",
+        "resolve_by": "value_code",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 6
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 4
+        }
+      },
+      {
+        "app_id": "haos",
+        "auto_resolve": true,
+        "env_sensitive": "low",
+        "field_key": "parentorg",
+        "form_id": "haos_adminorgdetail",
+        "label": "上级行政组织",
+        "name": "pick_parentorg_id",
+        "resolve_by": "value_code",
+        "resolve_status": "pending",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 2
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 10
+        }
+      }
+    ],
+    "scenario_kind": "create",
+    "scenario_stages": [
+      "save"
+    ],
+    "step_count": 36,
+    "steps": [
+      {
+        "app_id": "bos",
+        "form_id": "bos_portal_myapp_new",
+        "id": "open_portal",
+        "optional": false,
+        "target": "",
+        "type": "open_form"
+      },
+      {
+        "ac": "menuItemClick",
+        "app_id": "bos",
+        "args_count": 1,
+        "form_id": "bos_portal_myapp_new",
+        "id": "menuItemClick_32",
+        "key": "appnavigationmenuap",
+        "method": "menuItemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "bos",
+        "args_count": 1,
+        "form_id": "home_page",
+        "id": "selectTab_34",
+        "key": "tabap",
+        "method": "selectTab",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "homs",
+        "args_count": 0,
+        "form_id": "homs_apphome",
+        "id": "load_apphome",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_adminorgdetail",
+        "id": "load_adminorg",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "homs",
+        "args_count": 0,
+        "form_id": "bos_card_quicklaunch",
+        "id": "load_card_quicklaunch",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "homs",
+        "args_count": 0,
+        "form_id": "homs_orgfastchgcard",
+        "id": "load_orgfastchgcard",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "addnew",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_adminorgdetail",
+        "id": "click_addnew",
+        "key": "toolbarap",
+        "method": "itemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "homs",
+        "args_count": 1,
+        "form_id": "homs_apphome",
+        "id": "selectTab_49",
+        "key": "_submaintab_",
+        "method": "selectTab",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_adminorgdetail",
+        "id": "load_adminorg_2",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "getTelViaList",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_adminorgdetail",
+        "id": "getTelViaList_52",
+        "key": "kdtest_field024",
+        "method": "getTelViaList",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "getTelViaList",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_adminorgdetail",
+        "id": "getTelViaList_53",
+        "key": "kdtest_field026",
+        "method": "getCountrys",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "getTelViaList",
+        "app_id": "haos",
+        "args_count": 1,
+        "form_id": "haos_adminorgdetail",
+        "id": "getTelViaList_54",
+        "key": "kdtest_field026",
+        "method": "getProvincesByCountryId",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "app_id": "bos",
+        "form_id": "hbp_reviselogpage",
+        "id": "open_reviselogpage",
+        "optional": true,
+        "target": "",
+        "type": "open_form"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "hbp",
+        "args_count": 0,
+        "form_id": "hbp_reviselogpage",
+        "id": "load_reviselogpage",
+        "key": "",
+        "method": "loadData",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "app_id": "haos",
+        "field_key": "org",
+        "form_id": "haos_adminorgdetail",
+        "id": "pick_org_ctx",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "haos",
+        "field_key": "changescene",
+        "form_id": "haos_adminorgdetail",
+        "id": "pick_changescene",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "ac": "changeYear",
+        "app_id": "haos",
+        "args_count": 1,
+        "form_id": "haos_adminorgdetail",
+        "id": "changeYear_57",
+        "key": "bsed",
+        "method": "changeYear",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "app_id": "haos",
+        "fields": [
+          {
+            "field_key": "bsed",
+            "value_shape": {
+              "kind": "literal",
+              "length": 10
+            }
+          },
+          {
+            "field_key": "name",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          },
+          {
+            "field_key": "number",
+            "value_shape": {
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
+            }
+          }
+        ],
+        "form_id": "haos_adminorgdetail",
+        "id": "fill_bsed_etc",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "app_id": "haos",
+        "field_key": "adminorgtype",
+        "form_id": "haos_adminorgdetail",
+        "id": "pick_adminorgtype",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "haos",
+        "field_key": "parentorg",
+        "form_id": "haos_adminorgdetail",
+        "id": "pick_parentorg_ctx",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "app_id": "haos",
+        "field_key": "otclassify",
+        "form_id": "haos_adminorgdetail",
+        "id": "pick_otclassify_ctx",
+        "optional": false,
+        "type": "pick_basedata",
+        "value_id_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "ac": "save",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_adminorgdetail",
+        "id": "click_new_save",
+        "key": "tbmain",
+        "method": "itemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_orgdetailtopinfo",
+        "id": "load_orgdetailtop",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "close",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_adminorgdetail",
+        "id": "click_bar_close",
+        "key": "tbmain",
+        "method": "itemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "homs",
+        "args_count": 1,
+        "form_id": "homs_apphome",
+        "id": "selectTab_64",
+        "key": "_submaintab_",
+        "method": "selectTab",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "commonSearch",
+        "app_id": "haos",
+        "args_count": 3,
+        "form_id": "haos_adminorgdetail",
+        "id": "commonSearch_67",
+        "key": "filtercontainerap",
+        "method": "commonSearch",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "entryRowClick",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_adminorgdetail",
+        "id": "entryRowClick_68",
+        "key": "billlistap",
+        "method": "entryRowClick",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "entryRowClick",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_adminorgdetail",
+        "id": "entryRowClick_69",
+        "key": "billlistap",
+        "method": "entryRowClick",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "entryRowClick",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_adminorgdetail",
+        "id": "entryRowClick_70",
+        "key": "billlistap",
+        "method": "entryRowClick",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "entryRowClick",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_adminorgdetail",
+        "id": "entryRowClick_71",
+        "key": "billlistap",
+        "method": "hyperLinkClick",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_adminorgdetail",
+        "id": "load_adminorg_3",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "homs",
+        "args_count": 1,
+        "form_id": "homs_apphome",
+        "id": "selectTab_73",
+        "key": "_submaintab_",
+        "method": "selectTab",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_orgdetailtopinfo",
+        "id": "load_orgdetailtop_2",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "getCountrys",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_adminorgdetail",
+        "id": "getCountrys_75",
+        "key": "kdtest_field026",
+        "method": "getCountrys",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "getCountrys",
+        "app_id": "haos",
+        "args_count": 1,
+        "form_id": "haos_adminorgdetail",
+        "id": "getCountrys_76",
+        "key": "kdtest_field026",
+        "method": "getProvincesByCountryId",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      }
+    ],
+    "target_forms": [],
+    "vars": [
+      {
+        "label": "名称",
+        "name": "test_name",
+        "value_shape": {
+          "kind": "template",
+          "tokens": [
+            "${vars.*}"
+          ]
+        }
+      },
+      {
+        "label": "编号",
+        "name": "test_number",
+        "value_shape": {
+          "kind": "template",
+          "tokens": [
+            "${rand:*}"
+          ]
+        }
+      }
+    ]
+  },
+  "preview": {
+    "components": {
+      "coverage_percent": 82,
+      "handler_ids": [
+        "form_load",
+        "dialog_confirm",
+        "open_form",
+        "portal_navigation",
+        "geo_lookup",
+        "basedata_selector",
+        "generic_safe_invoke",
+        "tree_context",
+        "list_navigation",
+        "field_update",
+        "persistence_action",
+        "entry_table",
+        "lookup_query"
+      ],
+      "partial_steps": 28,
+      "risk_level": "medium",
+      "supported_steps": 50,
+      "total_steps": 78,
+      "unsupported_steps": 0
+    },
+    "detected_vars": [
+      "test_name",
+      "test_number"
+    ],
+    "field_catalog": {
+      "count": 9,
+      "field_ids": [
+        "field_haos_adminorgdetail_form_org",
+        "field_haos_adminorgdetail_entry_changescene",
+        "field_haos_adminorgdetail_form_bsed",
+        "field_haos_adminorgdetail_form_number",
+        "field_haos_adminorgdetail_form_name",
+        "field_haos_adminorgdetail_entry_adminorgtype",
+        "field_haos_adminorgdetail_form_parentorg",
+        "field_haos_adminorgdetail_form_otclassify",
+        "control_haos_adminorgdetail_form_tbmain_save_itemclick"
+      ],
+      "unknown_count": 0
+    },
+    "generation_gate": {
+      "allow_generate": true,
+      "allow_run": true,
+      "blocker_codes": [],
+      "decision": "ready",
+      "preflight_decision": "review"
+    },
+    "ir_alignment": {
+      "grade": "A",
+      "issue_codes": [],
+      "risk_level": "low",
+      "warning_codes": []
+    },
+    "main_form_id": "haos_adminorgdetail",
+    "maintainability": {
+      "auto_resolve_pick_count": 5,
+      "business_flow_count": 21,
+      "business_flow_step_count": 78,
+      "detected_var_count": 2,
+      "high_env_sensitive_count": 1,
+      "ir_interaction_bridge_status": "ready_with_warnings",
+      "ir_interaction_count": 9,
+      "ir_interaction_high_risk_uncovered_count": 0,
+      "ir_interaction_uncovered_count": 3,
+      "ir_write_anchor_count": 1,
+      "ir_write_anchor_uncovered_count": 0,
+      "ir_write_bridge_status": "ready",
+      "ir_write_contract_missing_count": 0,
+      "pick_field_count": 7,
+      "response_contract_counts": {
+        "advisory": 0,
+        "business": 0,
+        "critical": 1
+      },
+      "response_signature_step_count": 1
+    },
+    "pageid_alignment": {
+      "grade": "A",
+      "issue_codes": [
+        "showform_billformid_not_followed"
+      ],
+      "preserve_l2_count": 0,
+      "recorded_cross_form_count": 0,
+      "recorded_exact_link_count": 79,
+      "recorded_external_root_count": 0,
+      "recorded_filtered_source_count": 10,
+      "recorded_reuse_after_close_count": 1,
+      "risk_level": "medium"
+    },
+    "pick_field_keys": [
+      "adminorgtype",
+      "bsed",
+      "changescene",
+      "org",
+      "otclassify",
+      "parentorg",
+      "treeview.focus.id"
+    ],
+    "quality": {
+      "blocking": false,
+      "grade": "A",
+      "issue_codes": [
+        "partial_components_many"
+      ],
+      "score": 100
+    },
+    "scenario_kind": "create",
+    "scenario_stages": [
+      "save"
+    ]
+  },
+  "sample_id": "03_admin_org",
+  "schema_version": 2,
+  "source_har": "preview_1778835311_新增一条行政组织.har",
+  "source_sha256": "70c9ed909e82ebc0c1911fd86a17b3edc0d5eea76894209067603e28cc3826c3",
+  "summary_hash": "d7c362d9337b80aafe3485316754f514c1baa091bcd0a27941c4eb811f7a2d3f",
+  "title": "新增一条行政组织"
+}

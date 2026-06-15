@@ -1,0 +1,151 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+logs/
+*.log
+*.jsonl
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Sensitive files - NEVER COMMIT
+config/webui.yaml
+config/
+!config.example/
+config/envs/*.yaml
+!config/envs/*.example.yaml
+secrets/
+.env.local
+.env.*.local
+
+# HAR files may contain sensitive data
+*.har
+har_uploads/
+
+# Generated files
+cases/*.yaml
+!cases/*.example.yaml
+data/
+outputs/
+!data/.gitkeep
+task_plan.md
+findings.md
+progress.md
+tmp_*.json
+step*_*.png
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Local docs (not shipped)
+docs/
+
+# Database
+*.db-journal
+*.db-wal
+
+# Docker
+.docker/
+
+# Node (if frontend gets built)
+node_modules/
+
+# Temporary outputs and debug files
+entity_*.json
+out.txt
+debug.log
+pf_result.txt
+scripts/diff_*.txt
+data/pf_*.txt
+data/pf_*.json
+data/test_output.*
+data/env_field_cache.json
+check_*.py
+diag_*.py
+test_getEntityType.py
+scripts/check_*.py
+scripts/diag_*.py
+scripts/final_check.py
+scripts/get_details.py
+scripts/list_steps.py
+scripts/p0_*.py
+scripts/p1_*.py
+scripts/quick_check.py
+scripts/run_remaining*.py
+scripts/test_*.py
+scripts/verify_*.py
+scripts/verify_results.json
