@@ -342,7 +342,55 @@ def list_case_files() -> list[Path]:
     d = cases_dir()
     if not d.exists():
         return []
-    return sorted(d.rglob("*.yaml"))
+    # 跳过以 . 开头的隐藏文件/目录（如 .tree_meta.json）和备份文件
+    result = []
+    for p in sorted(d.rglob("*.yaml")):
+        if any(part.startswith(".") for part in p.relative_to(d).parts):
+            continue
+        result.append(p)
+    return result
+
+
+TREE_META_FILE = ".tree_meta.json"
+
+
+def _safe_rel_path(raw: str) -> str:
+    """清洗用户传入的相对路径，防止越权（复用 case_path_from_name 同款规则）。"""
+    return str(raw or "").replace("..", "").replace("\\", "/").strip("/")
+
+
+def list_folders() -> list[str]:
+    """递归返回 cases_dir 下所有子目录的相对路径（含空目录），跳过隐藏目录。"""
+    d = cases_dir()
+    if not d.exists():
+        return []
+    folders = []
+    for sub in d.rglob("*"):
+        if not sub.is_dir():
+            continue
+        rel = sub.relative_to(d)
+        if any(part.startswith(".") for part in rel.parts):
+            continue
+        folders.append(str(rel).replace("\\", "/"))
+    return sorted(folders)
+
+
+def read_tree_meta() -> dict:
+    p = cases_dir() / TREE_META_FILE
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8")) or {}
+        except Exception:
+            return {}
+    return {}
+
+
+def write_tree_meta(meta: dict) -> None:
+    d = cases_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    (d / TREE_META_FILE).write_text(
+        json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 def case_name_from_path(path: Path) -> str:
@@ -690,6 +738,62 @@ def api_batch_delete_cases(body: dict = Body(...)):
     return {"ok": True, "deleted": deleted, "count": len(deleted)}
 
 
+@APP.post("/api/cases/batch_move")
+def api_batch_move_cases(body: dict = Body(...)):
+    """批量移动用例到指定文件夹（target_folder 为空=根节点）。
+
+    保留用例的基础名（最后一段），仅改变所属目录前缀；
+    移动文件的同时同步更新 YAML 内的 name 字段。
+    """
+    names = body.get("names", [])
+    if not isinstance(names, list):
+        raise HTTPException(400, "names must be a list")
+    target_folder = _safe_rel_path(body.get("target_folder"))
+    moved = []
+    skipped = []
+    errors = []
+    for name in names:
+        old_path = case_path_from_name(name)
+        if not old_path.exists():
+            errors.append({"name": name, "reason": "用例不存在"})
+            continue
+        # 计算基础名（去掉原目录前缀）
+        base = name.rsplit("/", 1)[-1]
+        new_name = f"{target_folder}/{base}" if target_folder else base
+        # 已在目标文件夹则跳过
+        if new_name == name:
+            skipped.append(name)
+            continue
+        new_path = case_path_from_name(new_name)
+        if new_path.exists():
+            errors.append({"name": name, "reason": f"目标已存在: {new_name}"})
+            continue
+        # 同步更新 YAML 内的 name 字段
+        try:
+            content = old_path.read_text(encoding="utf-8")
+            new_content = re.sub(
+                r"^(name:\s*).*$",
+                rf"\g<1>{new_name}",
+                content,
+                count=1,
+                flags=re.MULTILINE,
+            )
+            if new_content != content:
+                old_path.write_text(new_content, encoding="utf-8")
+        except Exception:
+            pass  # name 字段更新失败不阻断移动
+        new_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(old_path), str(new_path))
+        moved.append({"old": name, "new": new_name})
+    return {
+        "ok": True,
+        "moved": moved,
+        "skipped": skipped,
+        "errors": errors,
+        "count": len(moved),
+    }
+
+
 @APP.post("/api/cases/{name:path}/copy")
 def api_copy_case(name: str, body: dict = Body(...)):
     """复制用例 YAML，保留原始内容并同步新用例 name/created_at。"""
@@ -805,6 +909,85 @@ def api_update_case_description(name: str, body: dict = Body(...)):
     new_content = _dump_yaml_plain(data)
     p.write_text(new_content, encoding="utf-8")
     return {"ok": True}
+
+
+# ============================================================
+# Endpoint: 文件夹（左树）
+# ============================================================
+@APP.get("/api/folders")
+def api_list_folders():
+    """返回 cases_dir 下所有子目录的相对路径列表。"""
+    return {"folders": list_folders()}
+
+
+@APP.get("/api/folders/meta")
+def api_get_folders_meta():
+    """读取树元信息（如根节点别名）。"""
+    meta = read_tree_meta()
+    return {"root_label": meta.get("root_label") or "根节点"}
+
+
+@APP.put("/api/folders/meta")
+def api_update_folders_meta(body: dict = Body(...)):
+    """更新根节点别名。"""
+    label = str(body.get("root_label") or "").strip()
+    if not label:
+        raise HTTPException(400, "root_label 不能为空")
+    meta = read_tree_meta()
+    meta["root_label"] = label
+    write_tree_meta(meta)
+    return {"ok": True, "root_label": label}
+
+
+@APP.post("/api/folders")
+def api_create_folder(body: dict = Body(...)):
+    """新建文件夹。"""
+    rel = _safe_rel_path(body.get("path"))
+    if not rel:
+        raise HTTPException(400, "path 不能为空")
+    target = cases_dir() / rel
+    if target.exists():
+        raise HTTPException(409, f"文件夹已存在: {rel}")
+    target.mkdir(parents=True, exist_ok=True)
+    return {"ok": True, "path": rel}
+
+
+@APP.post("/api/folders/rename")
+def api_rename_folder(body: dict = Body(...)):
+    """重命名/移动文件夹。"""
+    old_rel = _safe_rel_path(body.get("path"))
+    new_rel = _safe_rel_path(body.get("new_path"))
+    if not old_rel or not new_rel:
+        raise HTTPException(400, "path 和 new_path 不能为空")
+    old_path = cases_dir() / old_rel
+    new_path = cases_dir() / new_rel
+    if not old_path.exists() or not old_path.is_dir():
+        raise HTTPException(404, f"文件夹不存在: {old_rel}")
+    if new_path.exists():
+        raise HTTPException(409, f"目标文件夹已存在: {new_rel}")
+    new_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(old_path), str(new_path))
+    return {"ok": True, "path": old_rel, "new_path": new_rel}
+
+
+@APP.delete("/api/folders")
+def api_delete_folder(path: str, force: bool = False):
+    """删除文件夹。默认仅允许删空目录；force=true 递归删除。"""
+    rel = _safe_rel_path(path)
+    if not rel:
+        raise HTTPException(400, "path 不能为空")
+    target = cases_dir() / rel
+    if not target.exists() or not target.is_dir():
+        raise HTTPException(404, f"文件夹不存在: {rel}")
+    # 检查是否为空（忽略隐藏文件）
+    contents = [c for c in target.iterdir() if not c.name.startswith(".")]
+    if contents and not force:
+        raise HTTPException(
+            409,
+            {"message": f"文件夹非空，含 {len(contents)} 项", "count": len(contents)},
+        )
+    shutil.rmtree(target)
+    return {"ok": True, "path": rel}
 
 
 # ============================================================

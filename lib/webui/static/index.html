@@ -50,6 +50,41 @@
       background: rgba(6,182,212,0.1);
       border: 1px solid rgba(6,182,212,0.2);
     }
+
+    /* ⭐ 左侧文件夹树 */
+    .folder-tree-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--color-muted);
+      transition: all 0.12s ease;
+      user-select: none;
+    }
+    .folder-tree-row:hover { background: rgba(255,255,255,0.05); color: var(--color-text); }
+    .folder-tree-row.active {
+      background: rgba(6,182,212,0.12);
+      color: var(--color-cyan);
+    }
+    .folder-tree-row .folder-actions {
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      margin-left: auto;
+      display: flex;
+      gap: 2px;
+    }
+    .folder-tree-row:hover .folder-actions { opacity: 1; }
+    .folder-tree-row .folder-actions button {
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--color-muted);
+    }
+    .folder-tree-row .folder-actions button:hover { color: var(--color-cyan); background: rgba(255,255,255,0.08); }
+
     
     /* 毛玻璃卡片 */
     .glass-card {
@@ -499,6 +534,68 @@
       </div>
     </div>
 
+    <!-- ⭐ 左树右表布局 -->
+    <div class="flex gap-4 items-start">
+
+    <!-- 左侧：文件夹树 -->
+    <aside class="glass-card p-3 w-64 flex-shrink-0" style="min-height: 420px;">
+      <div class="flex items-center justify-between mb-2 px-1">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">文件夹</span>
+        <button @click="createFolder('')" class="text-slate-400 hover:text-sky-400 text-sm px-1" title="新建顶层文件夹">+ 新建</button>
+      </div>
+      <!-- 根节点 -->
+      <div class="folder-tree-row" :class="{ 'active': currentFolder==='' }" @click="selectFolder('')">
+        <span class="text-sm">🏠</span>
+        <template x-if="!editingRootLabel">
+          <span class="flex-1 truncate" x-text="`${rootLabel} (${rootCaseCount()})`"></span>
+        </template>
+        <template x-if="editingRootLabel">
+          <input x-model="editingRootLabelValue" @blur="saveRootLabel()" @keyup.enter="$event.target.blur()" @keyup.escape="editingRootLabel=false" @click.stop
+                 class="bg-gray-700 border border-sky-500 rounded px-1 py-0.5 text-white text-xs flex-1" x-ref="rootLabelInput">
+        </template>
+        <div class="folder-actions">
+          <button @click.stop="createFolder('')" title="新建子文件夹">+</button>
+          <button @click.stop="startEditRootLabel(); $nextTick(() => $refs.rootLabelInput?.focus())" title="重命名根节点">✎</button>
+        </div>
+      </div>
+      <!-- 文件夹节点 -->
+      <template x-for="node in flatTree()" :key="node.path">
+        <div class="folder-tree-row" :class="{ 'active': currentFolder===node.path }"
+             :style="`padding-left: ${8 + node.depth * 14}px`"
+             @click="selectFolder(node.path)">
+          <button x-show="node.hasChildren" @click.stop="toggleFolderExpand(node.path)"
+                  class="text-slate-500 hover:text-slate-300 w-3" x-text="node.expanded ? '▾' : '▸'"></button>
+          <span x-show="!node.hasChildren" class="w-3"></span>
+          <span class="text-sm">📁</span>
+          <template x-if="editingFolder !== node.path">
+            <span class="flex-1 truncate" x-text="`${node.name} (${node.caseCount})`" :title="node.path"></span>
+          </template>
+          <template x-if="editingFolder === node.path">
+            <input x-model="editingFolderValue" @blur="saveFolderRename(node.path)" @keyup.enter="$event.target.blur()" @keyup.escape="cancelEditFolder()" @click.stop
+                   class="bg-gray-700 border border-sky-500 rounded px-1 py-0.5 text-white text-xs flex-1" x-ref="folderInput">
+          </template>
+          <div class="folder-actions">
+            <button @click.stop="createFolder(node.path)" title="新建子文件夹">+</button>
+            <button @click.stop="startEditFolder(node.path); $nextTick(() => $refs.folderInput?.focus())" title="重命名">✎</button>
+            <button @click.stop="deleteFolder(node.path)" title="删除" class="hover:!text-rose-400">🗑</button>
+          </div>
+        </div>
+      </template>
+    </aside>
+
+    <!-- 右侧：用例表格 -->
+    <div class="flex-1 min-w-0">
+
+    <!-- 当前文件夹面包屑 -->
+    <div class="flex items-center gap-1 mb-3 text-xs text-slate-400 flex-wrap">
+      <template x-for="(crumb, ci) in folderBreadcrumb()" :key="crumb.path">
+        <span class="flex items-center gap-1">
+          <span @click="selectFolder(crumb.path)" class="cursor-pointer hover:text-sky-400" x-text="crumb.label"></span>
+          <span x-show="ci < folderBreadcrumb().length - 1" class="text-slate-600">/</span>
+        </span>
+      </template>
+    </div>
+
     <!-- 搜索和筛选 -->
     <div class="glass-card p-4 mb-4">
       <div class="flex flex-col md:flex-row md:items-center gap-3">
@@ -535,6 +632,7 @@
         <div class="flex-1"></div>
         <button @click="dashSelectAll()" class="text-xs text-cyan-400 hover:text-cyan-300 px-2 py-1">全选</button>
         <button @click="dashSelected = new Set()" class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1">取消</button>
+        <button @click="openMoveDialog()" class="btn btn-secondary btn-sm">移动到文件夹</button>
         <button @click="batchDeleteCases()" class="btn btn-danger btn-sm">批量删除</button>
       </div>
     </div>
@@ -665,6 +763,29 @@
                        disabled:text-slate-600 disabled:border-slate-800 disabled:cursor-not-allowed">
           下一页 →
         </button>
+      </div>
+    </div>
+    </div><!-- /右侧用例表格 -->
+    </div><!-- /左树右表布局 -->
+
+    <!-- ⭐ 批量移动到文件夹 对话框 -->
+    <div x-show="showMoveDialog" x-transition.opacity
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+         @click.self="showMoveDialog=false" @keydown.escape.window="showMoveDialog=false" style="display:none">
+      <div class="glass-card p-6 w-full max-w-md mx-4" @click.stop>
+        <h3 class="text-lg font-semibold mb-1">移动到文件夹</h3>
+        <p class="text-xs text-slate-500 mb-4">将选中的 <span class="text-cyan-400 font-bold" x-text="dashSelected.size"></span> 条用例移动到目标文件夹（保留用例名）。</p>
+        <label class="block text-xs text-slate-500 mb-1">目标文件夹</label>
+        <select x-model="moveTargetFolder" class="input-glass w-full text-sm mb-4">
+          <option value="" x-text="rootLabel + '（根节点）'"></option>
+          <template x-for="f in folders" :key="f">
+            <option :value="f" x-text="f"></option>
+          </template>
+        </select>
+        <div class="flex justify-end gap-2">
+          <button @click="showMoveDialog=false" class="btn btn-secondary btn-sm">取消</button>
+          <button @click="confirmMoveCases()" class="btn btn-primary btn-sm">确认移动</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1540,6 +1661,15 @@
             <input type="text" x-model="harCaseName"
                    class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 mono text-sm"
                    placeholder="用例文件名">
+            <label class="block text-xs text-slate-500">目标文件夹</label>
+            <select x-model="harTargetFolder"
+                    class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm">
+              <option value="" x-text="rootLabel + '（根节点）'"></option>
+              <template x-for="f in folders" :key="f">
+                <option :value="f" x-text="f"></option>
+              </template>
+            </select>
+            <div class="text-xs text-slate-500">将生成: <code class="mono text-sky-400" x-text="`cases/${harTargetFolder ? harTargetFolder + '/' : ''}${harCaseName || '<name>'}.yaml`"></code></div>
             <div class="flex gap-2">
               <button @click="doExtractHar()" :disabled="!harCaseName || harUploading || !harCanGenerate()"
                       class="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 text-white px-3 py-2 rounded text-sm">
@@ -2225,8 +2355,16 @@
                placeholder="例如: employee_new"
                class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 mono"
                @keydown.enter="doExtractHar()">
+        <label class="block text-sm text-slate-400 mb-1 mt-3">目标文件夹</label>
+        <select x-model="harTargetFolder"
+                class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm">
+          <option value="" x-text="rootLabel + '（根节点）'"></option>
+          <template x-for="f in folders" :key="f">
+            <option :value="f" x-text="f"></option>
+          </template>
+        </select>
         <div class="text-xs text-slate-500 mt-1">
-          将生成文件: <code class="mono text-sky-400" x-text="`cases/${harCaseName || '<name>'}.yaml`"></code>
+          将生成文件: <code class="mono text-sky-400" x-text="`cases/${harTargetFolder ? harTargetFolder + '/' : ''}${harCaseName || '<name>'}.yaml`"></code>
         </div>
       </div>
       <label x-show="harReadbackPlanCount() > 0"
@@ -2338,6 +2476,51 @@
       </div>
     </div>
 
+    <!-- ⭐ 左树右表布局 -->
+    <div class="flex gap-4 items-start">
+
+    <!-- 左侧：文件夹树 -->
+    <aside class="glass-card p-3 w-64 flex-shrink-0" style="min-height: 360px;">
+      <div class="flex items-center justify-between mb-2 px-1">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">文件夹</span>
+      </div>
+      <!-- 根节点 -->
+      <div class="folder-tree-row" :class="{ 'active': currentFolder==='' }" @click="selectFolder('')">
+        <span class="text-sm">🏠</span>
+        <span class="flex-1 truncate" x-text="`${rootLabel} (${rootCaseCount()})`"></span>
+        <div class="folder-actions">
+          <button @click.stop="selectFolderCases('')" title="选中根节点下所有用例">☑</button>
+        </div>
+      </div>
+      <!-- 文件夹节点 -->
+      <template x-for="node in flatTree()" :key="node.path">
+        <div class="folder-tree-row" :class="{ 'active': currentFolder===node.path }"
+             :style="`padding-left: ${8 + node.depth * 14}px`"
+             @click="selectFolder(node.path)">
+          <button x-show="node.hasChildren" @click.stop="toggleFolderExpand(node.path)"
+                  class="text-slate-500 hover:text-slate-300 w-3" x-text="node.expanded ? '▾' : '▸'"></button>
+          <span x-show="!node.hasChildren" class="w-3"></span>
+          <span class="text-sm">📁</span>
+          <span class="flex-1 truncate" x-text="`${node.name} (${node.caseCount})`" :title="node.path"></span>
+          <div class="folder-actions">
+            <button @click.stop="selectFolderCases(node.path)" title="选中该文件夹（含子孙）所有用例">☑</button>
+          </div>
+        </div>
+      </template>
+    </aside>
+
+    <!-- 右侧：用例表格 -->
+    <div class="flex-1 min-w-0">
+
+    <!-- 面包屑 -->
+    <div class="flex items-center gap-1 mb-3 text-xs text-slate-400 flex-wrap">
+      <template x-for="(crumb, ci) in folderBreadcrumb()" :key="crumb.path">
+        <span class="flex items-center gap-1">
+          <span @click="selectFolder(crumb.path)" class="cursor-pointer hover:text-sky-400" x-text="crumb.label"></span>
+          <span x-show="ci < folderBreadcrumb().length - 1" class="text-slate-600">/</span>
+        </span>
+      </template>
+    </div>
 
     <!-- 搜索栏 -->
     <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
@@ -2467,6 +2650,8 @@
                 title="末页">»</button>
       </div>
     </div>
+    </div><!-- /右侧用例表格 -->
+    </div><!-- /左树右表布局 -->
   </div>
 
   <!-- 任务详情视图 -->
@@ -3546,6 +3731,7 @@ function app() {
     harPreview: null,
 	    harFile: null,
 	    harCaseName: '',
+	    harTargetFolder: '',  // ⭐ HAR 导入目标文件夹（空=根节点）
 	    harVarConfig: [],     // ⭐ 变量配置（从 preview 初始化，用户可编辑）
 	    harPickFields: [],    // ⭐ 环境相关字段（从 preview 初始化，用户可编辑）
 	    harValidationPointConfig: [], // ⭐ 校验点配置（系统必校 + 字段生效候选）
@@ -3565,6 +3751,20 @@ function app() {
     casePage: 1,
     casePageSize: 8,
     dashSelected: new Set(),
+
+    // ⭐ 文件夹树（左树右表）
+    folders: [],            // 后端返回的子目录相对路径列表
+    rootLabel: '根节点',     // 根节点别名
+    currentFolder: '',      // 当前选中文件夹（空串=根）
+    expandedFolders: {},    // 展开状态 { path: true }
+    editingFolder: '',      // 正在重命名的文件夹路径
+    editingFolderValue: '', // 重命名输入值
+    editingRootLabel: false,
+    editingRootLabelValue: '',
+
+    // ⭐ 批量移动到文件夹
+    showMoveDialog: false,    // 移动对话框开关
+    moveTargetFolder: '',     // 移动目标文件夹（空=根节点）
 
     // 用例详情增强
     detailTab: 'result',  // result | vars | yaml | steps
@@ -3595,6 +3795,8 @@ function app() {
     batchSearch: '',
     batchFilteredCases() {
       let list = this.cases;
+      // ⭐ 先按当前文件夹过滤
+      list = list.filter(c => this.caseInFolder(c.name, this.currentFolder));
       const q = (this.batchSearch || '').trim().toLowerCase();
       if (q) {
         list = list.filter(c => {
@@ -3666,6 +3868,7 @@ function app() {
       this.applyTheme();
       
       await Promise.all([this.loadCases(), this.loadEnvs()]);
+      await this.loadFolders();
       this.checkFlakyStatus();
       const cfg = await (await fetch('/api/config')).json();
       this.webuiPrefs = cfg.webui;
@@ -3729,6 +3932,232 @@ function app() {
       // 分页越界修正
       if (this.batchPage > this.batchPageCount) this.batchPage = this.batchPageCount;
     },
+
+    // ======== 文件夹树 ========
+    async loadFolders() {
+      try {
+        const [foldersResp, metaResp] = await Promise.all([
+          fetch('/api/folders'),
+          fetch('/api/folders/meta'),
+        ]);
+        const fData = await foldersResp.json();
+        const mData = await metaResp.json();
+        this.folders = fData.folders || [];
+        this.rootLabel = mData.root_label || '根节点';
+      } catch (e) {
+        this.folders = [];
+      }
+    },
+
+    // 由 folders + cases 路径前缀合成树。返回根节点的子节点数组
+    buildTree() {
+      // 收集所有目录路径（含用例 name 中隐含的目录）
+      const dirSet = new Set(this.folders);
+      for (const c of this.cases) {
+        const idx = (c.name || '').lastIndexOf('/');
+        if (idx > 0) {
+          // 逐级加入父目录
+          const parts = c.name.slice(0, idx).split('/');
+          let acc = '';
+          for (const part of parts) {
+            acc = acc ? acc + '/' + part : part;
+            dirSet.add(acc);
+          }
+        }
+      }
+      const allDirs = Array.from(dirSet).filter(Boolean).sort();
+      // 构建节点映射（caseCount 为含所有子孙的递归总数）
+      const nodeMap = {}; // path -> node
+      for (const dir of allDirs) {
+        nodeMap[dir] = { path: dir, name: dir.split('/').pop(), children: [], caseCount: this.casesUnderFolder(dir).length };
+      }
+      // 挂载父子关系
+      const roots = [];
+      for (const dir of allDirs) {
+        const node = nodeMap[dir];
+        const pidx = dir.lastIndexOf('/');
+        if (pidx > 0) {
+          const parent = dir.slice(0, pidx);
+          if (nodeMap[parent]) nodeMap[parent].children.push(node);
+          else roots.push(node);
+        } else {
+          roots.push(node);
+        }
+      }
+      return roots;
+    },
+
+    // 根节点统计全部用例（含所有子孙）
+    rootCaseCount() {
+      return this.cases.length;
+    },
+
+    // 某文件夹（含子孙）下的所有用例 name
+    casesUnderFolder(folderPath) {
+      if (!folderPath) return this.cases.map(c => c.name);
+      const prefix = folderPath + '/';
+      return this.cases.filter(c => (c.name || '').startsWith(prefix)).map(c => c.name);
+    },
+
+    selectFolder(path) {
+      this.currentFolder = path || '';
+      this.casePage = 1;
+      this.batchPage = 1;
+    },
+
+    toggleFolderExpand(path) {
+      this.expandedFolders[path] = !this.expandedFolders[path];
+    },
+
+    async createFolder(parentPath) {
+      const name = (prompt('新建文件夹名称', '新建文件夹') || '').trim();
+      if (!name) return;
+      if (name.includes('/')) { this.showToast('名称不能包含 /'); return; }
+      const path = parentPath ? parentPath + '/' + name : name;
+      try {
+        const resp = await fetch('/api/folders', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ path }),
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          this.showToast('新建失败: ' + this.apiErrorMessage(err, String(resp.status)));
+          return;
+        }
+        if (parentPath) this.expandedFolders[parentPath] = true;
+        await this.loadFolders();
+        this.showToast('✓ 已新建文件夹 ' + name);
+      } catch (e) {
+        this.showToast('新建失败: ' + e.message);
+      }
+    },
+
+    startEditFolder(path) {
+      this.editingFolder = path;
+      this.editingFolderValue = path.split('/').pop();
+    },
+
+    cancelEditFolder() {
+      this.editingFolder = '';
+      this.editingFolderValue = '';
+    },
+
+    async saveFolderRename(oldPath) {
+      const newName = (this.editingFolderValue || '').trim();
+      this.editingFolder = '';
+      if (!newName || newName.includes('/')) { this.showToast('名称无效'); return; }
+      const pidx = oldPath.lastIndexOf('/');
+      const newPath = pidx > 0 ? oldPath.slice(0, pidx) + '/' + newName : newName;
+      if (newPath === oldPath) return;
+      try {
+        const resp = await fetch('/api/folders/rename', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ path: oldPath, new_path: newPath }),
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          this.showToast('重命名失败: ' + this.apiErrorMessage(err, String(resp.status)));
+          return;
+        }
+        // 当前选中受影响则同步
+        if (this.currentFolder === oldPath || this.currentFolder.startsWith(oldPath + '/')) {
+          this.currentFolder = this.currentFolder.replace(oldPath, newPath);
+        }
+        await Promise.all([this.loadFolders(), this.loadCases()]);
+        this.showToast('✓ 已重命名');
+      } catch (e) {
+        this.showToast('重命名失败: ' + e.message);
+      }
+    },
+
+    async deleteFolder(path) {
+      const cnt = this.casesUnderFolder(path).length;
+      let force = false;
+      if (cnt > 0) {
+        if (!confirm(`文件夹「${path}」含 ${cnt} 个用例，确认连同用例一起删除？`)) return;
+        force = true;
+      } else {
+        if (!confirm(`确认删除空文件夹「${path}」？`)) return;
+      }
+      try {
+        const resp = await fetch(`/api/folders?path=${encodeURIComponent(path)}&force=${force}`, {
+          method: 'DELETE',
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          this.showToast('删除失败: ' + this.apiErrorMessage(err, String(resp.status)));
+          return;
+        }
+        if (this.currentFolder === path || this.currentFolder.startsWith(path + '/')) {
+          this.currentFolder = '';
+        }
+        await Promise.all([this.loadFolders(), this.loadCases()]);
+        this.showToast('✓ 已删除文件夹');
+      } catch (e) {
+        this.showToast('删除失败: ' + e.message);
+      }
+    },
+
+    startEditRootLabel() {
+      this.editingRootLabel = true;
+      this.editingRootLabelValue = this.rootLabel;
+    },
+
+    async saveRootLabel() {
+      const label = (this.editingRootLabelValue || '').trim();
+      this.editingRootLabel = false;
+      if (!label || label === this.rootLabel) return;
+      try {
+        const resp = await fetch('/api/folders/meta', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ root_label: label }),
+        });
+        if (!resp.ok) { this.showToast('保存失败'); return; }
+        this.rootLabel = label;
+        this.showToast('✓ 已更新根节点名称');
+      } catch (e) {
+        this.showToast('保存失败: ' + e.message);
+      }
+    },
+
+    // 当前文件夹面包屑段
+    folderBreadcrumb() {
+      if (!this.currentFolder) return [{ label: this.rootLabel, path: '' }];
+      const crumbs = [{ label: this.rootLabel, path: '' }];
+      const parts = this.currentFolder.split('/');
+      let acc = '';
+      for (const part of parts) {
+        acc = acc ? acc + '/' + part : part;
+        crumbs.push({ label: part, path: acc });
+      }
+      return crumbs;
+    },
+
+    // ⭐ 扁平化可见树节点（含 depth），供单层 x-for 渲染
+    flatTree() {
+      const result = [];
+      const walk = (nodes, depth) => {
+        for (const node of nodes) {
+          const hasChildren = node.children && node.children.length > 0;
+          const expanded = !!this.expandedFolders[node.path];
+          result.push({
+            path: node.path,
+            name: node.name,
+            depth,
+            caseCount: node.caseCount,
+            hasChildren,
+            expanded,
+          });
+          if (hasChildren && expanded) walk(node.children, depth + 1);
+        }
+      };
+      walk(this.buildTree(), 0);
+      return result;
+    },
+
 
     async checkFlakyStatus() {
       for (const c of this.cases) {
@@ -4880,12 +5309,16 @@ function app() {
         };
       }
       try {
+        // ⭐ 拼接目标文件夹为路径前缀
+        const targetCaseName = this.harTargetFolder
+          ? `${this.harTargetFolder}/${this.harCaseName}`
+          : this.harCaseName;
         const resp = await fetch('/api/har/extract', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             har_file: this.harFile,
-            case_name: this.harCaseName,
+            case_name: targetCaseName,
             env_id: this.currentEnv || '',
             var_overrides: varOverrides,
             pick_field_overrides: pickFieldOverrides,
@@ -4900,6 +5333,9 @@ function app() {
         }
         const data = await resp.json();
         await this.loadCases();
+        await this.loadFolders();
+        // ⭐ 定位到导入的目标文件夹
+        this.currentFolder = this.harTargetFolder || '';
         const renameNote = data.renamed_from ? `同名已自动改名为 ${data.name}` : `已生成 ${data.name}`;
         this.showToast('✓ ' + renameNote);
         await this.openCase(data.name || this.harCaseName);
@@ -4915,6 +5351,14 @@ function app() {
       if (this.batchSelected.has(name)) this.batchSelected.delete(name);
       else this.batchSelected.add(name);
       this.batchSelected = new Set(this.batchSelected);
+    },
+    // ⭐ 选中某文件夹（含子孙）下所有用例
+    selectFolderCases(folderPath) {
+      for (const name of this.casesUnderFolder(folderPath)) {
+        this.batchSelected.add(name);
+      }
+      this.batchSelected = new Set(this.batchSelected);
+      this.showToast(`已选中 ${this.batchSelected.size} 个用例`);
     },
     selectAll() {
       this.batchSelected = new Set(this.cases.map(c => c.name));
@@ -7500,8 +7944,16 @@ function app() {
     },
 
     // ======== Dashboard 搜索/排序/批量 ========
+    // ⭐ 判断用例是否属于指定文件夹（含所有子孙；根节点返回全部）
+    caseInFolder(caseName, folderPath) {
+      if (!folderPath) return true;  // 根节点：展示全部用例
+      return (caseName || '').startsWith(folderPath + '/');  // 含所有子孙
+    },
+
     filteredCases() {
       let list = this.cases;
+      // ⭐ 先按当前文件夹过滤（根节点：无目录前缀的用例；子文件夹：仅直属用例）
+      list = list.filter(c => this.caseInFolder(c.name, this.currentFolder));
       if (this.caseSearch.trim()) {
         const q = this.caseSearch.trim().toLowerCase();
         list = list.filter(c => {
@@ -7576,6 +8028,41 @@ function app() {
         this.showToast(`已删除 ${data.count} 条用例`);
       } catch (e) {
         this.showToast('批量删除失败: ' + e.message);
+      }
+    },
+
+    // ⭐ 打开"移动到文件夹"对话框
+    openMoveDialog() {
+      if (this.dashSelected.size === 0) return;
+      this.moveTargetFolder = this.currentFolder || '';
+      this.showMoveDialog = true;
+    },
+
+    // ⭐ 执行批量移动
+    async confirmMoveCases() {
+      const names = Array.from(this.dashSelected);
+      if (names.length === 0) { this.showMoveDialog = false; return; }
+      try {
+        const resp = await fetch('/api/cases/batch_move', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({names, target_folder: this.moveTargetFolder || ''}),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok) {
+          throw new Error(data.detail || data.error || '移动失败');
+        }
+        this.showMoveDialog = false;
+        this.dashSelected = new Set();
+        await this.loadFolders();
+        await this.loadCases();
+        this.currentFolder = this.moveTargetFolder || '';
+        let msg = `已移动 ${data.count} 条用例`;
+        if (data.skipped && data.skipped.length) msg += `，${data.skipped.length} 条已在目标`;
+        if (data.errors && data.errors.length) msg += `，${data.errors.length} 条失败`;
+        this.showToast(msg);
+      } catch (e) {
+        this.showToast('移动失败: ' + e.message);
       }
     },
 
