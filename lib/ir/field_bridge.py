@@ -210,12 +210,19 @@ def _binding_row(
     source_step_id = str(meta.get("source_step_id") or "")
     resolver_kind = _resolver_kind(field_id, meta, panel=panel)
     user_overridden = bool(meta.get("user_overridden") or meta.get("manual_override"))
+    has_maintained_value = any(
+        str(meta.get(key) or "").strip()
+        for key in ("value_code", "value_id", "value_name", "value_number")
+    )
     is_runtime_context = bool(
         meta.get("context_only")
         or meta.get("required_context")
         or str(meta.get("source") or "") == "runtime_rule"
     )
-    if is_runtime_context and not user_overridden:
+    # 软必填上下文字段：仅当用户维护了真实非空值时才升级为强绑定要求。
+    # 空值即使被标记 user_overridden（前端默认透传），也应继续走 context 豁免，
+    # 避免“未填值却被当成已维护”导致 maintainable_value_unbound 误报拦截生成。
+    if is_runtime_context and not (user_overridden and has_maintained_value):
         return {
             "id": field_id,
             "panel": panel,
