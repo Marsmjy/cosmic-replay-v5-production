@@ -27,6 +27,7 @@ def test_vnext_is_modular_and_keeps_legacy_as_explicit_fallback():
     assert "execution-center.js" in app
     assert "log-viewer.js" in app
     assert "diagnosis-workspace.js" in app
+    assert "environment-settings.js" in app
 
 
 def test_vnext_uses_one_field_catalog_value_lineage_and_persisted_validation_points():
@@ -67,16 +68,47 @@ def test_vnext_supports_resumable_execution_cancel_logs_and_evidence_bound_ai():
     app = _vnext_file("js/app.js")
     logs = _vnext_file("js/logs/log-viewer.js")
     diagnosis = _vnext_file("js/diagnosis/diagnosis-workspace.js")
+    execution = _vnext_file("js/execution/execution-center.js")
+    history = _vnext_file("js/reports/run-history.js")
+    run_diagnostics = _vnext_file("js/reports/run-diagnostics.js")
 
     assert "after_seq" in app
     assert "EventSource" in app
     assert "api.cancelRun" in app
     assert "run.events?.at(-1)?.seq" in app
+    assert "buildAiTroubleshootingPrompt" in app
     assert "导出诊断包" in logs
     assert "evidence_ref" in logs
     assert "失败结论" in diagnosis
     assert "应用前 Diff" in diagnosis
     assert "我已审查差异和风险" in diagnosis
+    assert "执行值快照" in execution
+    assert "业务字段最终值" in execution
+    assert "复制AI排障信息" in execution
+    assert "交给 AI 排查" in execution
+    assert "排障信息已生成" in execution
+    assert "执行值" in history
+    assert "复制排障" in history
+    assert "运行时变量值" in run_diagnostics
+    assert "业务字段最终值" in run_diagnostics
+
+
+def test_vnext_exposes_environment_configuration_workspace():
+    app = _vnext_file("js/app.js")
+    api = _vnext_file("js/api-client.js")
+    settings = _vnext_file("js/settings/environment-settings.js")
+
+    assert '["settings", "环境配置"]' in app
+    assert "renderEnvironmentSettings" in app
+    assert "api.saveWebui" in app
+    assert "api.saveEnv" in app
+    assert "api.deleteEnv" in app
+    assert "config: (mask = true)" in api
+    assert "环境配置" in settings
+    assert "Base URL" in settings
+    assert "数据中心 ID" in settings
+    assert "基础资料 ID 映射" in settings
+    assert "保存掩码 ******** 时会保留原密码" in settings
 
 
 def test_har_preview_exposes_ir_write_contract_coverage():

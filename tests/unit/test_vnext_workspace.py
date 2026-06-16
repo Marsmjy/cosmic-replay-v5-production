@@ -198,12 +198,44 @@ def test_run_snapshot_is_structured_replayable_and_redacts_secrets():
                 "name": "显示名",
                 "case_file_name": "workspace",
                 "env_id": "persisted-target",
+                "vars_def": {"person_name": "录制姓名", "password": "secret"},
+                "vars_labels": {"person_name": "姓名"},
+                "vars_meta": {
+                    "person_name": {
+                        "recorded_value": "录制姓名",
+                    },
+                },
+                "field_catalog": [{
+                    "field_id": "person_name",
+                    "order": 1,
+                    "label": "姓名",
+                    "field_key": "name",
+                    "field_type": "text",
+                    "vars": ["person_name"],
+                    "source_step_id": "save",
+                }],
             },
         },
         {
             "seq": 2,
-            "type": "step_start",
+            "type": "session_ready",
             "ts": 2,
+            "data": {
+                "resolved_vars": [{
+                    "key": "person_name",
+                    "label": "姓名",
+                    "value": "目标姓名",
+                }, {
+                    "key": "password",
+                    "label": "密码",
+                    "value": "secret",
+                }],
+            },
+        },
+        {
+            "seq": 3,
+            "type": "step_start",
+            "ts": 3,
             "data": {
                 "id": "save",
                 "label": "保存",
@@ -212,15 +244,15 @@ def test_run_snapshot_is_structured_replayable_and_redacts_secrets():
             },
         },
         {
-            "seq": 3,
+            "seq": 4,
             "type": "step_fail",
-            "ts": 3,
+            "ts": 4,
             "data": {"id": "save", "error": "响应契约失败", "cookie": "sid=secret"},
         },
         {
-            "seq": 4,
+            "seq": 5,
             "type": "case_done",
-            "ts": 4,
+            "ts": 5,
             "data": {
                 "passed": False,
                 "step_count": 1,
@@ -247,7 +279,11 @@ def test_run_snapshot_is_structured_replayable_and_redacts_secrets():
     assert snapshot["state"] == "failed"
     assert snapshot["steps"][0]["failure_summary"] == "响应契约失败"
     assert snapshot["steps"][0]["request"]["authorization"] == "***"
-    assert snapshot["logs"][2]["evidence_ref"] == "event:3"
+    assert snapshot["runtime_values"]["variables"][0]["resolved_value"] == "目标姓名"
+    assert snapshot["runtime_values"]["variables"][1]["resolved_value"] == "***"
+    assert snapshot["runtime_values"]["fields"][0]["final_request_value"] == "目标姓名"
+    assert snapshot["failure_summary"] == "响应契约失败"
+    assert snapshot["logs"][3]["evidence_ref"] == "event:4"
     assert redact({"password": "pw", "nested": {"token": "abc"}}) == {
         "password": "***",
         "nested": {"token": "***"},

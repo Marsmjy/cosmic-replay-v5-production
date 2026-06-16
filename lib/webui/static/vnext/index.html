@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cosmic Replay vNext</title>
   <link rel="stylesheet" href="/static/vnext/styles/tokens.css?v=20260615-2">
-  <link rel="stylesheet" href="/static/vnext/styles/workspace.css?v=20260615-4">
+  <link rel="stylesheet" href="/static/vnext/styles/workspace.css?v=20260616-3">
 </head>
 <body>
   <div class="app-shell">
@@ -37,7 +37,7 @@
     <aside id="readiness-panel" class="readiness-panel" aria-label="执行就绪检查"></aside>
   </div>
   <script type="module">
-    import("/static/vnext/js/app.js?v=20260615-8").catch((error) => {
+    import("/static/vnext/js/app.js?v=20260616-4").catch((error) => {
       console.error("vNext bootstrap failed", error);
       const region = document.querySelector("#notice-region");
       if (region) region.innerHTML = `<div class="notice is-error">前端模块加载失败：${error.message}</div>`;

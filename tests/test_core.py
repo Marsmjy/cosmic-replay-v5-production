@@ -302,6 +302,50 @@ class TestConfig:
         empty = Credentials()
         assert empty.is_configured() == False
 
+    def test_save_env_preserves_masked_password_and_env_secret_refs(self, tmp_path):
+        """前端保存掩码密码时不能覆盖真实凭证。"""
+        from lib.config import Config
+
+        cfg = Config(config_dir=tmp_path / "config")
+        cfg.save_env("sit", {
+            "name": "SIT",
+            "base_url": "https://example.test/ierp",
+            "datacenter_id": "dc",
+            "credentials": {
+                "username": "admin",
+                "password": "real-secret",
+                "username_env": "COSMIC_USERNAME",
+                "password_env": "COSMIC_PASSWORD",
+            },
+            "basedata": {"org": "100"},
+            "sign_required": True,
+            "timeout": 30,
+            "login_retries": 3,
+        })
+
+        cfg.save_env("sit", {
+            "name": "SIT Renamed",
+            "base_url": "https://example.test/ierp",
+            "datacenter_id": "dc",
+            "credentials": {
+                "username": "admin2",
+                "password": "********",
+            },
+            "basedata": {"org": "200"},
+            "runtime": {"sign_required": False, "timeout": 12, "login_retries": 1},
+        })
+
+        env = cfg.get_env("sit")
+        assert env.name == "SIT Renamed"
+        assert env.credentials.username == "admin2"
+        assert env.credentials.password == "real-secret"
+        assert env.credentials.username_env == "COSMIC_USERNAME"
+        assert env.credentials.password_env == "COSMIC_PASSWORD"
+        assert env.basedata == {"org": "200"}
+        assert env.sign_required is False
+        assert env.timeout == 12
+        assert env.login_retries == 1
+
 
 class TestEdgeCases:
     """边界条件测试"""

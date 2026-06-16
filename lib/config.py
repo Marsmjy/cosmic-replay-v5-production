@@ -32,6 +32,14 @@ CONFIG_DIR = SKILL_ROOT / "config"
 CONFIG_EXAMPLE_DIR = SKILL_ROOT / "config.example"
 
 
+def _is_masked_secret(value: Any) -> bool:
+    """Return True when a UI-submitted secret is only a display mask."""
+    if not isinstance(value, str):
+        return False
+    stripped = value.strip()
+    return len(stripped) >= 3 and set(stripped) == {"*"}
+
+
 # =============================================================
 # YAML 读写（复用 runner 的轻量解析器 + pyyaml fallback）
 # =============================================================
@@ -279,18 +287,38 @@ class Config:
         with self._lock:
             filename = f"{env_id}.yaml"
             path = self.config_dir / "envs" / filename
+            existing_env = self.get_env(env_id)
+            incoming_creds = data.get("credentials", {}) or {}
+            if not isinstance(incoming_creds, dict):
+                incoming_creds = {}
+            credentials = {
+                "username": existing_env.credentials.username if existing_env else "",
+                "password": existing_env.credentials.password if existing_env else "",
+                "username_env": existing_env.credentials.username_env if existing_env else "",
+                "password_env": existing_env.credentials.password_env if existing_env else "",
+            }
+            for key in ("username", "password", "username_env", "password_env"):
+                if key not in incoming_creds:
+                    continue
+                value = incoming_creds.get(key, "") or ""
+                if key == "password" and _is_masked_secret(value):
+                    continue
+                credentials[key] = str(value)
+            runtime = data.get("runtime", {}) or {}
+            if not isinstance(runtime, dict):
+                runtime = {}
             out: dict = {
                 "env": {
                     "name": data.get("name", env_id),
                     "base_url": data.get("base_url", ""),
                     "datacenter_id": data.get("datacenter_id", ""),
                 },
-                "credentials": data.get("credentials", {}) or {},
+                "credentials": credentials,
                 "basedata": data.get("basedata", {}) or {},
                 "runtime": {
-                    "sign_required": bool(data.get("sign_required", True)),
-                    "timeout": int(data.get("timeout", 30)),
-                    "login_retries": int(data.get("login_retries", 3)),
+                    "sign_required": bool(data.get("sign_required", runtime.get("sign_required", True))),
+                    "timeout": int(data.get("timeout", runtime.get("timeout", 30))),
+                    "login_retries": int(data.get("login_retries", runtime.get("login_retries", 3))),
                 },
             }
             _dump_yaml(path, out)
