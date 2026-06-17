@@ -2464,11 +2464,11 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 @APP.get("/")
 def serve_index():
-    mode = str(os.getenv("COSMIC_WEBUI_MODE", "vnext")).strip().lower()
+    mode = str(os.getenv("COSMIC_WEBUI_MODE", "legacy")).strip().lower()
     index = (
-        STATIC_DIR / "index.html"
-        if mode == "legacy"
-        else STATIC_DIR / "vnext" / "index.html"
+        STATIC_DIR / "vnext" / "index.html"
+        if mode == "vnext"
+        else STATIC_DIR / "index.html"
     )
     if index.exists():
         return FileResponse(
