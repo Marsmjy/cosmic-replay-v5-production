@@ -3354,117 +3354,63 @@
                 <div x-show="reportQueue('ai_agent').length"
                      class="mt-3 rounded-lg border border-rose-800/60 bg-rose-950/25 px-3 py-2 text-sm text-rose-100">
                   <span class="font-medium">下一步：</span>
-                  <span>点击「复制 AI 修复指令」发给 Codex/AI Agent；指令会要求 AI 先看 IR 摘要、动态值链路、pageId 链路、变量/环境字段和入库证据。</span>
-                </div>
-                <div class="grid grid-cols-2 lg:grid-cols-6 gap-2 mt-4">
-                  <div class="bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2">
-                    <div class="text-xs text-slate-500">失败</div>
-                    <div class="text-lg" :class="(currentReport?.acceptance?.failed || 0) ? 'text-rose-300' : 'text-emerald-300'" x-text="currentReport?.acceptance?.failed || 0"></div>
-                  </div>
-                  <div class="bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2">
-                    <div class="text-xs text-slate-500">入库已验证</div>
-                    <div class="text-lg text-emerald-300" x-text="currentReport?.acceptance?.write_verified || 0"></div>
-                  </div>
-                  <div class="bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2">
-                    <div class="text-xs text-slate-500">入库未验证</div>
-                    <div class="text-lg" :class="(currentReport?.acceptance?.write_unverified || 0) ? 'text-amber-300' : 'text-slate-300'" x-text="currentReport?.acceptance?.write_unverified || 0"></div>
-                  </div>
-                  <div class="bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2">
-                    <div class="text-xs text-slate-500">可自动修复</div>
-                    <div class="text-lg text-sky-300" x-text="currentReport?.acceptance?.auto_repairable || 0"></div>
-                  </div>
-                  <div class="bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2">
-                    <div class="text-xs text-slate-500">需确认</div>
-                    <div class="text-lg text-amber-300" x-text="currentReport?.acceptance?.manual_confirm || 0"></div>
-                  </div>
-                  <div class="bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2">
-                    <div class="text-xs text-slate-500">AI 诊断</div>
-                    <div class="text-lg" :class="(currentReport?.acceptance?.ai_required || 0) ? 'text-rose-300' : 'text-slate-300'" x-text="currentReport?.acceptance?.ai_required || 0"></div>
-                  </div>
+                  <span>在下方「用例执行详情」中点击对应用例的「复制 AI 指令」发给 Codex/AI Agent；指令会要求 AI 先看 IR 摘要、动态值链路、pageId 链路、变量/环境字段和入库证据。</span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div x-show="reportQueue('ai_agent').length || reportQueue('auto_repair').length || reportQueue('manual_confirm').length"
-               class="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-4">
-            <div x-show="reportQueue('auto_repair').length" class="bg-sky-950/20 border border-sky-800/60 rounded-lg p-3">
-              <div class="text-sm font-medium text-sky-200 mb-2">可自动修复</div>
-              <template x-for="item in reportQueue('auto_repair')" :key="item.name">
-                <div class="text-xs text-slate-300 truncate py-1" x-text="item.name" :title="item.error || item.name"></div>
-              </template>
-            </div>
-            <div x-show="reportQueue('manual_confirm').length" class="bg-amber-950/20 border border-amber-800/60 rounded-lg p-3">
-              <div class="text-sm font-medium text-amber-200 mb-2">需人工确认</div>
-              <template x-for="item in reportQueue('manual_confirm')" :key="item.name">
-                <div class="text-xs text-slate-300 truncate py-1" x-text="item.name" :title="item.error || item.name"></div>
-              </template>
-            </div>
-            <div x-show="reportQueue('ai_agent').length" class="bg-rose-950/20 border border-rose-800/60 rounded-lg p-3 lg:col-span-3">
-              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
-                <div>
-                  <div class="text-sm font-medium text-rose-200">需 AI Agent 诊断</div>
-                  <div class="text-xs text-slate-400 mt-1">系统已准备好修复上下文。复制指令后，AI 会优先检查 IR 摘要、动态值链路、pageId 链路、变量/环境字段和入库证据。</div>
-                  <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">
-                    <span class="rounded bg-slate-900 px-2 py-0.5 text-slate-300">IR 摘要</span>
-                    <span class="rounded bg-slate-900 px-2 py-0.5 text-slate-300">动态值链路</span>
-                    <span class="rounded bg-slate-900 px-2 py-0.5 text-slate-300">pageId 链路</span>
-                    <span class="rounded bg-slate-900 px-2 py-0.5 text-slate-300">变量/环境字段</span>
-                    <span class="rounded bg-slate-900 px-2 py-0.5 text-slate-300">入库证据</span>
-                  </div>
-                </div>
-                <button x-show="reportQueue('ai_agent').length === 1"
-                        @click="copyAgentRepairPrompt(reportQueue('ai_agent')[0])"
-                        class="text-xs px-3 py-1.5 rounded bg-rose-600 hover:bg-rose-500 text-white">
-                  复制 AI 修复指令
-                </button>
-              </div>
-              <template x-for="item in reportQueue('ai_agent')" :key="item.name">
-                <div class="flex flex-col md:flex-row md:items-center gap-2 py-2 border-t border-rose-900/40 first:border-t-0">
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm text-slate-200 truncate" x-text="item.name" :title="item.name"></div>
-                    <div class="text-xs text-slate-400 truncate"
-                         x-text="item.decision_title || item.reason || item.error || '需要排查入库证据、pageId 链路或断言盲区'"></div>
-                    <div x-show="item.next_step"
-                         class="mt-0.5 text-xs text-slate-500 truncate"
-                         x-text="item.next_step"></div>
-                  </div>
-                  <button @click="copyAgentRepairPrompt(item)"
-                          class="text-xs text-white bg-rose-600 hover:bg-rose-500 rounded px-3 py-1.5">
-                    复制 AI 修复指令
-                  </button>
-                  <a :href="agentEvidenceUrl(item.name)" target="_blank"
-                     class="text-xs text-rose-100 border border-rose-800 rounded px-3 py-1.5 hover:bg-rose-950 text-center">打开证据包</a>
-                </div>
-              </template>
             </div>
           </div>
         </div>
 
+
         <!-- 关键指标卡片 -->
         <div class="px-6 py-5 border-b border-slate-700/50">
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
-            <div class="bg-gray-800/80 rounded-xl p-4 text-center border border-gray-700/50">
-              <div class="text-2xl font-bold text-white" x-text="currentReport?.summary?.total_cases || 0"></div>
-              <div class="text-xs text-gray-400 mt-1.5">总用例</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border border-gray-700/50">
+              <div class="text-xl font-bold text-white" x-text="currentReport?.summary?.total_cases || 0"></div>
+              <div class="text-xs text-gray-400 mt-1">总用例</div>
             </div>
-            <div class="bg-gray-800/80 rounded-xl p-4 text-center border" 
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border border-gray-700/50">
+              <div class="text-xl font-bold text-emerald-300" x-text="currentReport?.acceptance?.passed ?? currentReport?.summary?.passed_cases ?? 0"></div>
+              <div class="text-xs text-gray-400 mt-1">通过</div>
+            </div>
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border border-gray-700/50">
+              <div class="text-xl font-bold" :class="(currentReport?.acceptance?.failed||0) ? 'text-rose-300':'text-slate-400'" x-text="currentReport?.acceptance?.failed ?? currentReport?.summary?.failed_cases ?? 0"></div>
+              <div class="text-xs text-gray-400 mt-1">失败</div>
+            </div>
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border"
                  :class="(currentReport?.summary?.pass_rate||0) >= 1 ? 'border-green-700/50' : ((currentReport?.summary?.pass_rate||0) >= 0.5 ? 'border-amber-700/50' : 'border-red-700/50')">
-              <div class="text-2xl font-bold" :class="(currentReport?.summary?.pass_rate||0) >= 1 ? 'text-green-400' : ((currentReport?.summary?.pass_rate||0) >= 0.5 ? 'text-amber-400' : 'text-rose-400')" 
+              <div class="text-xl font-bold" :class="(currentReport?.summary?.pass_rate||0) >= 1 ? 'text-green-400' : ((currentReport?.summary?.pass_rate||0) >= 0.5 ? 'text-amber-400' : 'text-rose-400')"
                    x-text="((currentReport?.summary?.pass_rate||0)*100).toFixed(1) + '%'"></div>
-              <div class="text-xs text-gray-400 mt-1.5">通过率</div>
+              <div class="text-xs text-gray-400 mt-1">通过率</div>
             </div>
-            <div class="bg-gray-800/80 rounded-xl p-4 text-center border border-gray-700/50">
-              <div class="text-2xl font-bold text-sky-400" x-text="(currentReport?.summary?.total_steps || 0)"></div>
-              <div class="text-xs text-gray-400 mt-1.5">总步骤</div>
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border border-gray-700/50">
+              <div class="text-xl font-bold text-emerald-300" x-text="currentReport?.acceptance?.write_verified || 0"></div>
+              <div class="text-xs text-gray-400 mt-1">入库已验证</div>
             </div>
-            <div class="bg-gray-800/80 rounded-xl p-4 text-center border border-gray-700/50">
-              <div class="text-2xl font-bold text-purple-400" x-text="(currentReport?.summary?.total_duration_s || 0).toFixed(1) + 's'"></div>
-              <div class="text-xs text-gray-400 mt-1.5">总耗时</div>
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border border-gray-700/50">
+              <div class="text-xl font-bold" :class="(currentReport?.acceptance?.write_unverified||0) ? 'text-amber-300':'text-slate-400'" x-text="currentReport?.acceptance?.write_unverified || 0"></div>
+              <div class="text-xs text-gray-400 mt-1">入库未验证</div>
+            </div>
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border border-gray-700/50">
+              <div class="text-xl font-bold text-sky-400" x-text="currentReport?.summary?.total_steps || 0"></div>
+              <div class="text-xs text-gray-400 mt-1">总步骤</div>
+            </div>
+            <div class="bg-gray-800/80 rounded-xl p-3 text-center border border-gray-700/50">
+              <div class="text-xl font-bold text-purple-400" x-text="(currentReport?.summary?.total_duration_s || 0).toFixed(1) + 's'"></div>
+              <div class="text-xs text-gray-400 mt-1">总耗时</div>
             </div>
           </div>
         </div>
         
+        <!-- 图表与分析（可折叠，默认收起） -->
+        <div class="px-6 py-3 border-b border-slate-700/50">
+          <button @click="toggleReportCharts()" class="flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-white">
+            <span class="text-slate-500" x-text="reportShowCharts ? '▾' : '▸'"></span>
+            <span>图表与分析</span>
+            <span class="text-xs text-slate-500 font-normal">错误分类 · 通过失败分布 · 耗时分布 · 性能 · 趋势</span>
+          </button>
+        </div>
+        <div x-show="reportShowCharts">
         <!-- 错误分类 -->
         <div x-show="currentReport?.error_breakdown && Object.values(currentReport.error_breakdown).some(v => v > 0)" class="px-6 py-4 border-b border-slate-700/50">
           <h4 class="text-sm font-medium text-gray-300 mb-3">错误分类</h4>
@@ -3563,6 +3509,7 @@
             <canvas x-ref="trendChart"></canvas>
           </div>
         </div>
+        </div><!-- end 图表与分析折叠区 -->
 
         <!-- 用例详情列表 -->
         <div class="px-6 py-5">
@@ -3579,8 +3526,41 @@
               <span>在目标环境按本次业务键确认，或补经过验证的只读回查；保存成功提示不能自动升级为已验证。</span>
             </div>
           </div>
-          <div class="overflow-x-auto scrollbar-thin">
-          <table class="w-full min-w-[860px] text-sm">
+          <div class="flex gap-4 items-start">
+            <!-- 左侧：文件夹树 -->
+            <aside class="glass-card p-3 w-56 flex-shrink-0" style="min-height: 280px;">
+              <div class="flex items-center justify-between mb-2 px-1">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">文件夹</span>
+              </div>
+              <div class="folder-tree-row" :class="{ 'active': reportCurrentFolder==='' }" @click="selectReportFolder('')">
+                <span class="text-sm">🏠</span>
+                <span class="flex-1 truncate" x-text="`${rootLabel} (${reportRootCaseCount()})`"></span>
+              </div>
+              <template x-for="node in reportFlatTree()" :key="node.path">
+                <div class="folder-tree-row" :class="{ 'active': reportCurrentFolder===node.path }"
+                     :style="`padding-left: ${8 + node.depth * 14}px`"
+                     @click="selectReportFolder(node.path)">
+                  <button x-show="node.hasChildren" @click.stop="toggleReportFolderExpand(node.path)"
+                          class="text-slate-500 hover:text-slate-300 w-3" x-text="node.expanded ? '▾' : '▸'"></button>
+                  <span x-show="!node.hasChildren" class="w-3"></span>
+                  <span class="text-sm">📁</span>
+                  <span class="flex-1 truncate" x-text="`${node.name} (${node.caseCount})`" :title="node.path"></span>
+                </div>
+              </template>
+            </aside>
+            <!-- 右侧：用例表格 -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1 mb-3 text-xs text-slate-400 flex-wrap">
+                <template x-for="(crumb, ci) in reportFolderBreadcrumb()" :key="crumb.path">
+                  <span class="flex items-center gap-1">
+                    <span @click="selectReportFolder(crumb.path)" class="cursor-pointer hover:text-sky-400" x-text="crumb.label"></span>
+                    <span x-show="ci < reportFolderBreadcrumb().length - 1" class="text-slate-600">/</span>
+                  </span>
+                </template>
+                <span class="ml-2 text-slate-500">共 <span class="text-slate-300" x-text="reportVisibleCases().length"></span> 个用例</span>
+              </div>
+              <div class="overflow-x-auto scrollbar-thin">
+              <table class="w-full min-w-[860px] text-sm">
             <thead class="text-xs text-slate-500">
               <tr>
                 <th class="text-left py-2">用例</th>
@@ -3592,7 +3572,7 @@
               </tr>
             </thead>
             <tbody>
-              <template x-for="r in currentReport.case_results" :key="r.name">
+              <template x-for="r in reportVisibleCases()" :key="r.name">
                 <tr class="border-t border-slate-800 hover:bg-slate-800/50">
                   <td class="py-2">
                     <!-- 用例名称可点击在新标签页中打开执行历史 -->
@@ -3642,22 +3622,13 @@
                 </tr>
               </template>
             </tbody>
-          </table>
+              </table>
+              </div>
+            </div>
           </div>
         </div>
         
-        <!-- 错误汇总 -->
-        <div x-show="currentReport.errors?.length > 0" class="px-6 py-4 border-t border-slate-700/50">
-          <div class="text-sm font-medium text-rose-400 mb-2">错误汇总</div>
-          <div class="space-y-2 text-xs">
-            <template x-for="e in currentReport.errors" :key="e.case">
-              <div class="bg-rose-900/20 rounded px-3 py-2">
-                <span class="font-medium text-rose-300 inline-block truncate max-w-sm align-middle" x-text="e.case" :title="e.case"></span>:
-                <span class="text-slate-300 inline-block truncate max-w-md align-middle" x-text="e.error" :title="e.error"></span>
-              </div>
-            </template>
-          </div>
-        </div>
+        <!-- 错误汇总已并入「用例执行详情」表格，不再重复展示 -->
         </div><!-- end 可滚动内容区 -->
 
         <!-- 底部操作栏 (固定) -->
@@ -3757,6 +3728,9 @@ function app() {
     rootLabel: '根节点',     // 根节点别名
     currentFolder: '',      // 当前选中文件夹（空串=根）
     expandedFolders: {},    // 展开状态 { path: true }
+    reportCurrentFolder: '',     // 批量报告详情：当前选中文件夹（空串=根）
+    reportExpandedFolders: {},   // 批量报告详情：展开状态 { path: true }
+    reportShowCharts: false,     // 批量报告详情：图表与分析折叠区（默认收起）
     editingFolder: '',      // 正在重命名的文件夹路径
     editingFolderValue: '', // 重命名输入值
     editingRootLabel: false,
@@ -4156,6 +4130,91 @@ function app() {
       };
       walk(this.buildTree(), 0);
       return result;
+    },
+
+    // ===== 批量报告「用例执行详情」左树右表（基于 currentReport.case_results） =====
+    reportCaseNames() {
+      return (this.currentReport?.case_results || []).map(r => r.name || '');
+    },
+    reportRootCaseCount() {
+      return (this.currentReport?.case_results || []).length;
+    },
+    reportCasesUnderFolder(folderPath) {
+      const names = this.reportCaseNames();
+      if (!folderPath) return names;
+      const prefix = folderPath + '/';
+      return names.filter(n => n.startsWith(prefix));
+    },
+    reportCaseInFolder(caseName, folderPath) {
+      if (!folderPath) return true;
+      return (caseName || '').startsWith(folderPath + '/');
+    },
+    reportBuildTree() {
+      const dirSet = new Set();
+      for (const name of this.reportCaseNames()) {
+        const idx = name.lastIndexOf('/');
+        if (idx > 0) {
+          const parts = name.slice(0, idx).split('/');
+          let acc = '';
+          for (const part of parts) {
+            acc = acc ? acc + '/' + part : part;
+            dirSet.add(acc);
+          }
+        }
+      }
+      const allDirs = Array.from(dirSet).filter(Boolean).sort();
+      const nodeMap = {};
+      for (const dir of allDirs) {
+        nodeMap[dir] = { path: dir, name: dir.split('/').pop(), children: [], caseCount: this.reportCasesUnderFolder(dir).length };
+      }
+      const roots = [];
+      for (const dir of allDirs) {
+        const node = nodeMap[dir];
+        const pidx = dir.lastIndexOf('/');
+        if (pidx > 0) {
+          const parent = dir.slice(0, pidx);
+          if (nodeMap[parent]) nodeMap[parent].children.push(node);
+          else roots.push(node);
+        } else {
+          roots.push(node);
+        }
+      }
+      return roots;
+    },
+    reportFlatTree() {
+      const result = [];
+      const walk = (nodes, depth) => {
+        for (const node of nodes) {
+          const hasChildren = node.children && node.children.length > 0;
+          const expanded = !!this.reportExpandedFolders[node.path];
+          result.push({ path: node.path, name: node.name, depth, caseCount: node.caseCount, hasChildren, expanded });
+          if (hasChildren && expanded) walk(node.children, depth + 1);
+        }
+      };
+      walk(this.reportBuildTree(), 0);
+      return result;
+    },
+    reportFolderBreadcrumb() {
+      if (!this.reportCurrentFolder) return [{ label: this.rootLabel, path: '' }];
+      const crumbs = [{ label: this.rootLabel, path: '' }];
+      const parts = this.reportCurrentFolder.split('/');
+      let acc = '';
+      for (const part of parts) {
+        acc = acc ? acc + '/' + part : part;
+        crumbs.push({ label: part, path: acc });
+      }
+      return crumbs;
+    },
+    selectReportFolder(path) {
+      this.reportCurrentFolder = path || '';
+    },
+    toggleReportFolderExpand(path) {
+      this.reportExpandedFolders[path] = !this.reportExpandedFolders[path];
+    },
+    reportVisibleCases() {
+      const list = this.currentReport?.case_results || [];
+      if (!this.reportCurrentFolder) return list;
+      return list.filter(r => this.reportCaseInFolder(r.name, this.reportCurrentFolder));
     },
 
 
@@ -5511,9 +5570,10 @@ function app() {
         const resp = await fetch(`/api/tasks/${taskId}/report`);
         if (!resp.ok) throw new Error('获取报告失败');
         this.currentReport = await resp.json();
+        this.reportCurrentFolder = '';
+        this.reportExpandedFolders = {};
+        this.reportShowCharts = false;
         this.showReportDialog = true;
-        this.loadReportTrend();
-        this.renderReportCharts();
       } catch (e) {
         this.showToast('获取报告失败: ' + e.message);
       }
@@ -6364,31 +6424,35 @@ function app() {
         ai_required: aiRequired,
         summary_text: `共 ${total} 条，通过 ${passed} 条，失败 ${failed} 条；入库已验证 ${writeVerified} 条，入库未验证 ${writeUnverified} 条；可自动修复 ${autoRepairable} 条，需确认 ${manualConfirm} 条，需 AI 诊断 ${aiRequired} 条。`,
       };
+      // 完整重算四个队列，避免确认入库后残留旧数据导致各区块不同步
+      const toQueueItem = (r) => ({
+        name: r.name,
+        run_id: r.run_id,
+        error: r.error,
+        write_status: r.write_status,
+        reason: r.ai_reason || '',
+        decision_summary: r.decision_summary || {},
+        decision_category: r.decision_summary?.category || '',
+        decision_title: r.decision_summary?.title || '',
+        next_step: r.decision_summary?.next_step || '',
+      });
       this.currentReport.action_queues = {
-        ...(this.currentReport.action_queues || {}),
-        ai_agent: cases.filter(r => r.next_action === 'ai_agent').map(r => ({
-          name: r.name,
-          run_id: r.run_id,
-          error: r.error,
-          write_status: r.write_status,
-          reason: r.ai_reason || '',
-          decision_summary: r.decision_summary || {},
-          decision_category: r.decision_summary?.category || '',
-          decision_title: r.decision_summary?.title || '',
-          next_step: r.decision_summary?.next_step || '',
-        })),
-        write_unverified: cases.filter(r => r.write_status === 'unverified').map(r => ({
-          name: r.name,
-          run_id: r.run_id,
-          error: r.error,
-          write_status: r.write_status,
-          reason: r.ai_reason || '',
-          decision_summary: r.decision_summary || {},
-          decision_category: r.decision_summary?.category || '',
-          decision_title: r.decision_summary?.title || '',
-          next_step: r.decision_summary?.next_step || '',
-        })),
+        auto_repair: cases.filter(r => r.next_action === 'auto_repair').map(toQueueItem),
+        manual_confirm: cases.filter(r => r.next_action === 'manual_confirm').map(toQueueItem),
+        ai_agent: cases.filter(r => r.next_action === 'ai_agent').map(toQueueItem),
+        write_unverified: cases.filter(r => r.write_status === 'unverified').map(toQueueItem),
       };
+    },
+
+    // 图表与分析折叠区：首次展开时才渲染（避免对隐藏 canvas 渲染导致尺寸为 0）
+    toggleReportCharts() {
+      this.reportShowCharts = !this.reportShowCharts;
+      if (this.reportShowCharts) {
+        this.$nextTick(() => {
+          this.renderReportCharts();
+          this.loadReportTrend();
+        });
+      }
     },
 
     agentEvidenceUrl(caseName) {
@@ -7570,9 +7634,10 @@ function app() {
         const resp = await fetch(`/api/tasks/${taskId}/report`);
         if (resp.ok) {
           this.currentReport = await resp.json();
+          this.reportCurrentFolder = '';
+          this.reportExpandedFolders = {};
+          this.reportShowCharts = false;
           this.showReportDialog = true;
-          this.loadReportTrend();
-          this.renderReportCharts();
         } else {
           this.showToast('报告不存在');
         }
