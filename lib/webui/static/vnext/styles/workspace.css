@@ -140,6 +140,13 @@ h1 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 680; }
 .field-name strong { display: block; }
 .field-name small, .cell-muted { color: var(--text-muted); font-size: 11px; }
 .field-input { width: 100%; min-width: 130px; }
+.field-var-hint {
+  display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;
+}
+.field-var-hint code {
+  color: var(--accent); background: rgba(13, 118, 110, 0.08);
+  padding: 1px 5px; border-radius: 4px; font-size: 11px;
+}
 .value-flow { gap: 5px; white-space: nowrap; }
 .value-arrow { color: #9da7a3; }
 
@@ -165,6 +172,17 @@ h1 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 680; }
 .badge.is-warning { background: var(--warning-soft); color: var(--warning); }
 .badge.is-danger { background: var(--danger-soft); color: var(--danger); }
 .badge.is-accent { background: var(--accent-soft); color: var(--accent); }
+.badge.is-flaky { background: var(--warning-soft); color: var(--warning); margin-left: 6px; }
+
+/* ⭐ P2: 顶栏工具（日志/设置/主题） */
+.topbar-tools { display: flex; align-items: center; gap: 10px; }
+.topbar-tools .text-link { background: transparent; border: 0; padding: 2px 2px; font-weight: 600; }
+.topbar-tools .text-link.is-active { text-decoration: underline; }
+.icon-btn {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; min-height: 30px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text);
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 .inspector {
   grid-area: inspect; padding: 18px 16px; border-left: 1px solid var(--border);
@@ -281,9 +299,91 @@ h1 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 680; }
 }
 .modal-card h2 { margin: 0 0 6px; font-size: 16px; }
 .modal-card p { margin: 0; }
+.modal-wide { max-width: 980px; padding: 0; }
+.modal-wide .panel-header { padding: 13px 16px; }
+.modal-wide .report-metrics,
+.modal-wide .report-chart,
+.modal-wide .report-tree-table { margin: 0 16px; }
+.modal-wide .report-tree-table { margin-bottom: 16px; }
+
+/* ⭐ 用例详情多 Tab */
+.detail-layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 14px; align-items: start; }
+.detail-steps { min-width: 0; }
+.detail-steps .panel-body { max-height: 560px; overflow: auto; }
+.detail-main { min-width: 0; }
+.step-flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.step-flow-item {
+  display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px;
+  cursor: pointer; border: 1px solid transparent;
+}
+.step-flow-item:hover { background: var(--surface-subtle); }
+.step-flow-item.is-selected-row { background: var(--accent-soft); border-color: var(--accent); }
+.step-flow-label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.tab {
+  border: 0; background: transparent; padding: 8px 12px; color: var(--text-muted);
+  border-bottom: 2px solid transparent; font-weight: 600; min-height: 36px;
+}
+.tab:hover { color: var(--text); }
+.tab.is-active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { min-height: 240px; }
+
+.result-conclusion { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.result-reason { margin: 0 0 8px; line-height: 1.6; }
+.result-disclaimer { margin: 0 0 12px; }
+.cell-danger { display: block; margin-top: 2px; color: var(--danger); font-size: 11px; }
+
+.repair-list { display: grid; gap: 8px; }
+.repair-item { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+.repair-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.repair-preview {
+  margin: 6px 0 0; padding: 8px; background: var(--surface-strong); border-radius: 6px;
+  font: 11px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-word;
+}
+
+.yaml-editor { display: grid; }
+.yaml-textarea {
+  width: 100%; min-height: 420px; resize: vertical; padding: 12px;
+  border: 1px solid var(--border); border-radius: 6px; background: #18201e; color: #dce8e4;
+  font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; outline: none;
+}
+.yaml-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+
+.step-nav { display: grid; gap: 6px; }
+.step-nav-item {
+  display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start;
+  padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+}
+.step-nav-item strong { display: block; }
+.step-nav-item small { display: block; margin-top: 2px; }
+
+/* ⭐ 报告弹窗 */
+.report-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
+.metric-card {
+  padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+  display: grid; gap: 4px; text-align: center;
+}
+.metric-card.is-success { border-color: #b7ddc6; background: var(--success-soft); }
+.metric-card.is-danger { border-color: #e7bbb7; background: var(--danger-soft); }
+.metric-card.is-accent { border-color: #b7dcd6; background: var(--accent-soft); }
+.metric-value { font-size: 22px; font-weight: 700; }
+.metric-label { font-size: 11px; color: var(--text-muted); }
+.report-chart { margin: 14px 0; }
+.bar-chart { display: flex; height: 18px; border-radius: 999px; overflow: hidden; background: var(--surface-strong); }
+.bar-fill.is-success { background: var(--success); }
+.bar-fill.is-danger { background: var(--danger); }
+.bar-legend { display: flex; gap: 16px; margin-top: 8px; color: var(--text-muted); font-size: 11px; }
+.bar-legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; }
+.bar-legend .dot.is-success { background: var(--success); }
+.bar-legend .dot.is-danger { background: var(--danger); }
+.report-tree-table .folder-tree-body { max-height: 320px; }
+.report-tree-table .panel-body { max-height: 360px; overflow: auto; }
 
 @media (max-width: 1100px) {
   .tree-table-layout { grid-template-columns: 200px minmax(0, 1fr); }
+  .detail-layout { grid-template-columns: 220px minmax(0, 1fr); }
+  .report-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 1100px) {
@@ -317,4 +417,58 @@ h1 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 680; }
   .result-hero .btn { margin-top: 12px; width: 100%; }
   .evidence-grid { grid-template-columns: 1fr; }
   .evidence-item { border-right: 0; border-bottom: 1px solid var(--border); }
+}
+
+/* ⭐ P2: 新手引导卡 */
+.guide-card { max-width: 480px; }
+.guide-card h2 { margin: 6px 0 8px; font-size: 18px; }
+.guide-body { margin: 0 0 8px; line-height: 1.6; }
+.guide-hint { margin: 0; line-height: 1.55; }
+.guide-steps { display: flex; gap: 6px; margin-bottom: 6px; }
+.guide-dot { width: 22px; height: 4px; border-radius: 999px; background: var(--surface-strong); }
+.guide-dot.is-active { background: var(--accent); }
+.guide-dot.is-done { background: var(--success); }
+
+/* ⭐ P2: 设置 / 环境管理 */
+.env-list { display: grid; gap: 10px; }
+.env-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+.env-card-head {
+  display: flex; align-items: center; gap: 10px; padding: 11px 13px; cursor: pointer; user-select: none;
+}
+.env-card-head:hover { background: var(--surface-subtle); }
+.env-caret { color: var(--text-muted); width: 14px; }
+.env-id { color: var(--text-muted); font-size: 11px; background: var(--surface-strong); padding: 1px 6px; border-radius: 4px; }
+.env-card-body { padding: 6px 14px 14px; border-top: 1px solid var(--border); }
+.field-row { display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center; padding: 6px 0; }
+.field-row > label { color: var(--text-muted); font-size: 12px; }
+.field-row .input, .field-row .select { width: 100%; }
+.pwd-wrap { display: flex; gap: 8px; }
+.pwd-wrap .input { flex: 1 1 auto; }
+.switch-label { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 12px; }
+.switch-label input { accent-color: var(--accent); }
+
+/* ⭐ P2: 日志 / 执行历史 */
+.logs-layout { grid-template-columns: 300px minmax(0, 1fr); }
+.logs-list-body { max-height: 620px; overflow: auto; display: grid; gap: 6px; }
+.logs-run-item {
+  padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer;
+}
+.logs-run-item:hover { background: var(--surface-subtle); }
+.logs-run-item.is-active { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.logs-run-top { display: flex; align-items: center; gap: 8px; }
+.logs-run-top strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.logs-run-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.logs-detail { min-width: 0; }
+.logs-detail-body { max-height: 620px; overflow: auto; }
+.logs-summary { display: flex; gap: 18px; flex-wrap: wrap; padding: 10px 12px; margin-bottom: 12px; background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 6px; }
+.logs-steps-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 12px; align-items: start; margin-top: 12px; }
+.logs-step-flow { max-height: 420px; overflow: auto; }
+.logs-step-detail { min-width: 0; border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--surface); }
+.logs-json { margin-top: 10px; }
+.logs-json summary { cursor: pointer; color: var(--accent); font-weight: 600; padding: 4px 0; }
+.logs-json .repair-preview { max-height: 320px; overflow: auto; }
+
+@media (max-width: 1100px) {
+  .logs-layout { grid-template-columns: 240px minmax(0, 1fr); }
+  .logs-steps-layout { grid-template-columns: 1fr; }
 }
