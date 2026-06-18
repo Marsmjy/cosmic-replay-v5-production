@@ -3,7 +3,7 @@
 ## 目录结构
 
 ```
-cosmic-replay-v4/
+cosmic-replay-v5-production/
 ├── lib/                    # 核心业务逻辑
 │   ├── replay.py          # 回放引擎（协议层）
 │   ├── runner.py          # 用例执行器（调度层）
