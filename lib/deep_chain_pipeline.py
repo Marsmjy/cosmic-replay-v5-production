@@ -622,6 +622,14 @@ def build_readback_plan(
             "method": "manual_or_custom_query",
             "reason": "YAML 中没有稳定业务键，需补 number/name/billno/description 变量或手工确认。",
             "plans": [],
+            "verification_gap": {
+                "gap_type": "no_stable_business_key",
+                "next_actions": [
+                    "补 number/billno/code/name/description 等稳定业务键变量。",
+                    "或在 vars_meta 标注 field_key，以便自动识别可回查的业务键。",
+                    "若确实无稳定键，仅能人工确认入库并记录原因，不能凭成功提示判定 verified。",
+                ],
+            },
             "guardrails": _readback_guardrails(),
         }
 
@@ -792,6 +800,14 @@ def _readback_assertion_policy(strategy: dict[str, Any]) -> dict[str, Any]:
                 "组织上下文或数据可见性可能与保存会话不同。未经表单专用验证前，"
                 "只能作为候选回查，不能自动生成硬断言。"
             ),
+            "verification_gap": {
+                "gap_type": "needs_form_specific_validation",
+                "next_actions": [
+                    "在目标环境用录制导航上下文复跑该只读查询，确认能命中本次保存的业务键。",
+                    "验证通过后，将该表单登记到 READBACK_STRATEGY_LIBRARY 再启用硬断言。",
+                    "在此之前用例维持 write_unverified，可走人工确认入库并记录原因。",
+                ],
+            },
         }
     if strategy.get("source") in {"strategy_library", "recorded_har_query"}:
         return {
@@ -803,6 +819,14 @@ def _readback_assertion_policy(strategy: dict[str, Any]) -> dict[str, Any]:
         "auto_append": False,
         "mode": "advisory",
         "reason": "通用 commonSearch 回查不保证所有表单可用，仅作为建议，不自动生成硬断言。",
+        "verification_gap": {
+            "gap_type": "generic_readback_unreliable",
+            "next_actions": [
+                "确认该表单 commonSearch 是否能查到刚保存的记录；不可靠则补录专用查询 HAR。",
+                "为该表单建模专用回查策略并经真实环境验证后，再启用硬断言。",
+                "在此之前用例维持 write_unverified，可走人工确认入库。",
+            ],
+        },
     }
 
 

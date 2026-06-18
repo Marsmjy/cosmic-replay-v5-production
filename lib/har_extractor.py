@@ -40,6 +40,7 @@ from lib.response_signature import (
 )
 from lib.request_signature import build_request_signature
 from lib.case_contract import attach_case_contract, build_case_contract
+from lib.ir.versions import canonical_version
 from lib.pageid_trace import (
     annotate_recorded_pageid_sources,
     annotate_pageid_recovery_strategies,
@@ -4531,7 +4532,7 @@ def _compact_ir_contract_for_yaml(
             status = "ready_with_warnings"
 
         return OrderedDict([
-            ("schema_version", 1),
+            ("schema_version", canonical_version("ir_contract")),
             ("source", "normalized_flow"),
             ("status", status),
             ("ir_schema_version", (ir_preview.get("schema_version") or "0.1")),
@@ -4598,7 +4599,7 @@ def _compact_ir_contract_for_yaml(
         ])
     except Exception as exc:
         return OrderedDict([
-            ("schema_version", 1),
+            ("schema_version", canonical_version("ir_contract")),
             ("source", "normalized_flow"),
             ("status", "diagnostic_failed"),
             ("ir_schema_version", "0.1"),
@@ -6984,7 +6985,7 @@ def build_yaml_case(
         log.warning("IR 导航策略应用失败，回退到旧规则: %s", exc)
         _mark_context_bridge_steps_required(cleaned, main_form)
         navigation_policy = {
-            "schema_version": 1,
+            "schema_version": canonical_version("navigation_policy"),
             "stage": "stage_1_navigation_list",
             "mode": "fallback",
             "status": "diagnostic_failed",
@@ -8097,7 +8098,7 @@ def preview_har(har_path: Path, meta_resolver=None) -> dict:
         log.warning("预览 IR 导航策略应用失败，回退到旧规则: %s", exc)
         _mark_navigation_steps_optional(preview_steps, main_form)
         ir_navigation_policy = {
-            "schema_version": 1,
+            "schema_version": canonical_version("navigation_policy"),
             "stage": "stage_1_navigation_list",
             "mode": "fallback",
             "status": "diagnostic_failed",
@@ -8834,7 +8835,7 @@ def preview_har(har_path: Path, meta_resolver=None) -> dict:
         from lib.yaml_schema import validate_yaml_schema
         preview_schema_contract = validate_yaml_schema({
             "name": f"preview_{main_form or 'case'}",
-            "schema_version": 1,
+            "schema_version": canonical_version("yaml"),
             "recording": recording,
             "vars_meta": preview_validation_case.get("vars_meta"),
             "pick_fields": preview_validation_case.get("pick_fields"),

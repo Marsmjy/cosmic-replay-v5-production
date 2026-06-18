@@ -239,6 +239,7 @@ def build_safe_summary(
             "status",
             "verified" if fully_verified else "write_unverified",
         ),
+        "first_success_verification_method": first_success_gate.get("verification_method", ""),
         "first_success_missing": list(first_success_gate.get("missing") or []),
         "first_success_checks": first_success_gate.get("checks") or {},
         "pageid_trace_count": len(pageid_events),
@@ -269,6 +270,12 @@ def sanitize_events(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows 控制台默认 GBK 编码，summary 中的 ✅/中文等字符直接 print 会触发
+    # UnicodeEncodeError 导致进程以 returncode=1 退出（即便证据已正确落盘），
+    # 使回归脚本把真实 PASS 误判为 FAIL。从入口根治：把输出流重配为 UTF-8。
+    for _stream in (sys.stdout, sys.stderr):
+        with contextlib.suppress(Exception):
+            _stream.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env", default="sit", help="Use config/envs/<env>.yaml without printing credentials")
     parser.add_argument("--case", type=Path, required=True, help="Generated YAML case to execute")

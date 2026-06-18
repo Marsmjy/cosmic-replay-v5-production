@@ -167,6 +167,39 @@ def test_readback_plan_uses_generic_strategy_for_unknown_forms():
     assert plan["plans"][0]["assertion_policy"]["mode"] == "advisory"
 
 
+def test_generic_strategy_emits_actionable_verification_gap():
+    """未建模表单不能自动硬断言，但必须给出可行动的 verification_gap。"""
+    case = {
+        "main_form_id": "custom_form",
+        "vars": {"test_number": "CRPLY_${rand:4}"},
+        "vars_meta": {
+            "test_number": {"field_key": "number", "form_id": "custom_form"}
+        },
+    }
+
+    plan = build_readback_plan(case)
+    policy = plan["plans"][0]["assertion_policy"]
+
+    # 红线：通用回查绝不能自动变硬断言（否则制造假 verified）
+    assert policy["auto_append"] is False
+    gap = policy["verification_gap"]
+    assert gap["gap_type"] == "generic_readback_unreliable"
+    assert gap["next_actions"]
+    assert any("验证" in action or "commonSearch" in action for action in gap["next_actions"])
+
+
+def test_no_business_key_emits_verification_gap():
+    """无稳定业务键时不 ready，且给出补键/人工确认的下一步。"""
+    case = {"main_form_id": "custom_form", "vars": {}, "vars_meta": {}}
+
+    plan = build_readback_plan(case)
+
+    assert plan["status"] == "not_ready"
+    gap = plan["verification_gap"]
+    assert gap["gap_type"] == "no_stable_business_key"
+    assert gap["next_actions"]
+
+
 def test_readback_plan_uses_fresh_menu_refresh_for_hcdm_salary_apply():
     case = {
         "main_form_id": "khr_hcdm_fapplybill",

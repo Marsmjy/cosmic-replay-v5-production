@@ -412,3 +412,32 @@ def test_har_advanced_diagnostics_include_ir_coverage_radar():
     assert "harPreview?.ir_alignment?.checks?.preview_role_counts?.write" in html
     assert "字段绑定" in html
     assert "harPreview?.ir_field_bridge?.checks?.bound_count" in html
+
+
+def test_write_status_five_state_palette_is_centralized_and_consistent():
+    """五态色板单一真相源：标签 / 配色 / 帮助文案三处必须覆盖同一组写入状态，
+    且颜色映射固定。防止回退或漂移导致 PASS 与真实入库五态被混淆。"""
+    html = _index_html()
+
+    # 配色映射固定（writeStatusClass）——单一真相源
+    assert "verified: 'bg-emerald-900/60 text-emerald-300'," in html
+    assert "manual_verified: 'bg-sky-900/60 text-sky-300'," in html
+    assert "unverified: 'bg-amber-900/60 text-amber-300'," in html
+    assert "failed: 'bg-rose-900/60 text-rose-300'," in html
+    assert "not_applicable: 'bg-slate-800 text-slate-400'," in html
+
+    # 标签覆盖同一组状态键（writeStatusLabel）
+    assert "verified: '已验证'," in html
+    assert "manual_verified: '人工确认'," in html
+    assert "unverified: '未验证'," in html
+    assert "failed: '失败'," in html
+    assert "not_applicable: '不适用'," in html
+
+    # 帮助文案必须把 unverified 与 verified 显式区分（PASS≠真实入库）
+    assert "已验证：已通过业务键或附件字段的后置只读回查确认真实入库。" in html
+    assert "失败：保存/提交阶段失败，不能视为入库成功。" in html
+
+    # 徽章渲染统一走中央函数，禁止绕过五态语义
+    assert ':class="writeStatusClass(r.write_status)"' in html
+    assert ':title="writeStatusHelp(r)"' in html
+    assert 'x-text="writeStatusLabel(r.write_status)"' in html

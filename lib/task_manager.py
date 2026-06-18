@@ -40,6 +40,7 @@ class CaseResult:
     env_fields: list[dict] = field(default_factory=list)
     runtime_evidence: dict = field(default_factory=dict)
     write_status: str = "not_checked"  # verified(readback) / unverified / failed / not_applicable / not_checked
+    write_verification_method: str = ""  # readback / response_contract / manual / ""（入库认定走的是哪条路径）
     write_evidence: dict = field(default_factory=dict)
     write_verification: dict = field(default_factory=dict)
     next_action: str = "none"  # none / auto_repair / manual_confirm / ai_agent
@@ -64,6 +65,7 @@ class CaseResult:
             "env_fields": self.env_fields[:20] if self.env_fields else [],
             "runtime_evidence": self.runtime_evidence,
             "write_status": self.write_status,
+            "write_verification_method": self.write_verification_method,
             "write_evidence": self.write_evidence,
             "write_verification": self.write_verification,
             "next_action": self.next_action,
@@ -372,6 +374,7 @@ def enrich_case_result(result: CaseResult) -> None:
         and (result.write_verification or {}).get("manual_confirmed")
     ):
         result.write_status = "manual_verified"
+        result.write_verification_method = "manual"
         result.write_evidence.setdefault("signals", []).append("manual_confirmed")
         result.write_evidence["manual_confirmed"] = True
         result.write_evidence["write_verified"] = True
@@ -403,6 +406,14 @@ def enrich_case_result(result: CaseResult) -> None:
             result.next_action = "manual_confirm"
     else:
         result.next_action = "none"
+    # 记录入库认定走的是哪条路径（供报告页区分 readback / response_contract）。
+    gate = (result.runtime_evidence or {}).get("first_success_gate") or {}
+    if result.write_status == "verified":
+        result.write_verification_method = gate.get("verification_method") or "readback"
+    elif result.write_status == "manual_verified":
+        result.write_verification_method = "manual"
+    else:
+        result.write_verification_method = ""
     result.decision_summary = build_decision_summary(result)
 
 
@@ -473,6 +484,15 @@ def infer_write_status(result: CaseResult) -> tuple[str, dict]:
         return finish("verified")
     if _has_verified_readback_assertion(result):
         evidence["signals"].append("assertion:readback_by_business_key")
+        return finish("verified")
+
+    # 响应契约级入库证据：当首次成功门槛已认定该用例的保存/提交响应与原始 HAR
+    # 录制的成功响应关键语义及 JSON 结构逐项一致（verification_method ==
+    # response_contract），即作为第三条 verified 路径。强度弱于上面的只读回查，
+    # 故排在 readback 判定之后；门槛已保证 response 契约无失败，不会与下方校验冲突。
+    gate = (result.runtime_evidence or {}).get("first_success_gate") or {}
+    if gate.get("verified") and gate.get("verification_method") == "response_contract":
+        evidence["signals"].append("first_success_gate:response_contract")
         return finish("verified")
 
     response_evidence_found = False

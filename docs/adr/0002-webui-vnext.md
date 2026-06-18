@@ -1,6 +1,6 @@
 # ADR 0002: parallel Web UI vNext
 
-- Status: Accepted
+- Status: Superseded by decision in "## Decision update (2026-06-16)"; vNext deprecated, legacy is the single mainline
 - Date: 2026-06-15
 - Scope: FastAPI web UI routes and static frontend
 
@@ -77,4 +77,21 @@ hero, and no nested card hierarchy.
 
 Set `COSMIC_WEBUI_MODE=legacy`, or navigate directly to `/legacy`. The vNext page
 does not own persistence, so rollback does not migrate or discard user data.
+
+## Decision update (2026-06-16)
+
+- Status: legacy is the single mainline; vNext is **deprecated**.
+- Rationale: the original parallel-delivery plan assumed convergence onto vNext, but
+  in practice every recent enhancement (left-tree/right-table layout, report detail
+  drawer, five-state result coloring) landed in `lib/webui/static/index.html` (legacy).
+  Keeping two divergent frontends increases maintenance cost with no user benefit.
+- Concrete decisions:
+  - `COSMIC_WEBUI_MODE` defaults to `legacy` (matches `lib/webui/server.py` `serve_index`).
+    `/` serves legacy; `/legacy` remains as an explicit alias.
+  - `vnext` mode and `static/vnext/` are retained only as an opt-in experiment and
+    receive no further feature work. They may be removed in a future cleanup ADR.
+  - The vNext user-facing rules above (single readiness state, single result
+    conclusion, business/technical separation, quiet compact visual direction)
+    remain the **design north star for legacy** and guide P2 UI convergence.
+- This decision does not change any API contract, persistence, or generated cases.
 

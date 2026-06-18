@@ -130,6 +130,22 @@ from lib.webui.application.har_import import HarImportService
 from lib.webui.repositories.case_repository import FileCaseRepository
 from lib.webui.routes.har import create_har_router
 
+# 可观测性/认证接线（防御式导入：prometheus_client 等依赖缺失时优雅降级，不破坏现有启动流程）
+try:
+    from lib.monitoring import MetricsMiddleware, get_metrics_response, metrics_collector
+    from lib.security.auth import setup_auth
+    _HAS_OBSERVABILITY = True
+except ImportError as _obs_err:
+    MetricsMiddleware = None
+    get_metrics_response = None
+    metrics_collector = None
+    setup_auth = None
+    _HAS_OBSERVABILITY = False
+    import logging as _logging
+    _logging.getLogger(__name__).warning(
+        "可观测性/认证未启用（缺依赖，如 prometheus_client）: %s", _obs_err
+    )
+
 
 def _preview_entity_ids(preview: dict) -> set[str]:
     entity_ids: set[str] = set()
@@ -187,6 +203,29 @@ def _persist_field_type_catalog(meta_resolver, entity_ids: set[str]) -> dict:
 CONFIG = Config()
 APP = FastAPI(title="cosmic-replay", version="0.1.0")
 _start_time = time.time()  # ⭐ P0-3: 启动时间，用于健康检查
+
+# ============================================================
+# 可观测性与认证接线
+# - MetricsMiddleware: 采集 HTTP 指标（已内置放行 /metrics、/api/health、/health）
+# - setup_auth: 默认可选认证；无 COSMIC_API_KEY 时为开发模式放行，
+#   设置 COSMIC_REQUIRE_AUTH=1 且配置了 API Key 才强制鉴权。
+# 依赖缺失时（_HAS_OBSERVABILITY=False）跳过接线，不影响现有功能。
+# ============================================================
+if _HAS_OBSERVABILITY:
+    APP.add_middleware(MetricsMiddleware)
+    setup_auth(
+        APP,
+        require_auth=os.environ.get("COSMIC_REQUIRE_AUTH", "").strip().lower() in ("1", "true", "yes"),
+        exclude_paths=[
+            "/", "/health", "/api/health", "/metrics",
+            "/docs", "/redoc", "/openapi.json", "/static", "/favicon.ico",
+        ],
+    )
+
+    @APP.get("/metrics")
+    async def metrics_endpoint():
+        """Prometheus 指标抓取端点（对齐 deploy/prometheus/prometheus.yml）。"""
+        return get_metrics_response()
 
 # 邮件通知
 _notification_config = {}
@@ -311,6 +350,17 @@ class RunSession:
                 )
             except Exception:
                 pass
+            # 可观测性：记录用例执行指标（Prometheus）
+            if metrics_collector is not None:
+                try:
+                    metrics_collector.record_case_run(
+                        case_name=self.case_name,
+                        env=self.env_id or "",
+                        status="passed" if payload.get("passed", False) else "failed",
+                        duration=float(payload.get("duration_s", 0) or 0),
+                    )
+                except Exception:
+                    pass
 
     def close(self):
         self.finished = True
@@ -1250,7 +1300,7 @@ def api_run_agent_evidence(run_id: str, case_name: str):
         package,
         skill_path("logs/agent_evidence"),
     )
-    package["evidence_path"] = str(evidence_path.relative_to(SKILL_ROOT))
+    package["evidence_path"] = evidence_path.relative_to(SKILL_ROOT).as_posix()
     return package
 
 
@@ -1951,6 +2001,7 @@ def _apply_manual_write_confirmations(report_data: dict) -> dict:
         if not verification.get("manual_confirmed"):
             continue
         row["write_status"] = "manual_verified"
+        row["write_verification_method"] = "manual"
         row["write_verification"] = verification
         row["next_action"] = "none"
         row["ai_reason"] = ""
@@ -2356,7 +2407,7 @@ def api_task_agent_evidence(task_id: str, case_name: str):
         package,
         skill_path("logs/agent_evidence"),
     )
-    package["evidence_path"] = str(evidence_path.relative_to(SKILL_ROOT))
+    package["evidence_path"] = evidence_path.relative_to(SKILL_ROOT).as_posix()
     return package
 
 

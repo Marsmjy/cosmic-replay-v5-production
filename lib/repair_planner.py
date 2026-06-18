@@ -67,6 +67,37 @@ _UNIQUE_HINTS = {
 }
 
 
+def _derive_confidence(signals: dict[str, Any]) -> str:
+    """由证据强度推导修复建议置信度，而非使用硬编码常量。
+
+    正向证据（定位越精确、上下文越齐全，置信度越高）：
+    - located_var: 精确定位到目标 vars 变量
+    - known_unique_key: 命中已知唯一键字段(number/code/name/email/phone)
+    - has_form_app: 主表单 form_id + app_id 齐全
+    - trusted_value: 存在可信的建议值
+    - explicit_field_key: 错误明确给出 field_key
+    负向证据：unresolved 表示关键信息缺失，直接降为 low。
+    """
+    if signals.get("unresolved"):
+        return "low"
+    score = 0
+    if signals.get("located_var"):
+        score += 2
+    if signals.get("known_unique_key"):
+        score += 1
+    if signals.get("has_form_app"):
+        score += 1
+    if signals.get("trusted_value"):
+        score += 1
+    if signals.get("explicit_field_key"):
+        score += 1
+    if score >= 3:
+        return "high"
+    if score >= 1:
+        return "medium"
+    return "low"
+
+
 def build_repair_plan(
     case: dict,
     failure_analysis: dict | None = None,
@@ -88,6 +119,8 @@ def build_repair_plan(
             repair = _plan_missing_required(case, fix)
         elif error_type == "duplicate":
             repair = _plan_duplicate(case, fix)
+        elif error_type in ("invalid_value", "invalid_format", "format"):
+            repair = _plan_invalid_value(case, fix)
         else:
             repair = None
         if repair:
@@ -101,6 +134,14 @@ def build_repair_plan(
             "field_key": "",
             "field_caption": failure_analysis.get("field_caption", ""),
             "confidence": failure_analysis.get("confidence", "medium"),
+        })
+        if repair:
+            repairs.append(repair)
+
+    if category == "business_invalid_value" and not any(r.operation == "refresh_invalid_value" for r in repairs):
+        repair = _plan_invalid_value(case, {
+            "field_key": "",
+            "field_caption": failure_analysis.get("field_caption", ""),
         })
         if repair:
             repairs.append(repair)
@@ -121,6 +162,8 @@ def apply_repair(case: dict, repair: dict) -> tuple[dict, bool, str]:
         return _apply_refresh_unique_var(new_case, repair)
     if op == "insert_missing_field":
         return _apply_insert_missing_field(new_case, repair)
+    if op == "refresh_invalid_value":
+        return _apply_refresh_invalid_value(new_case, repair)
     return case, False, f"未知修复操作: {op}"
 
 
@@ -170,7 +213,7 @@ def _plan_duplicate(case: dict, fix: dict) -> Repair | None:
             title="刷新唯一字段变量",
             reason="检测到唯一字段重复，但未能定位对应 vars 变量。",
             operation="refresh_unique_var",
-            confidence="low",
+            confidence=_derive_confidence({"unresolved": True}),
             safe_to_apply=False,
             preview="请手工为编号/名称/邮箱等变量追加 ${rand:6} 或 ${timestamp}。",
             target={"field_key": field_key, "field_caption": field_caption},
@@ -184,12 +227,18 @@ def _plan_duplicate(case: dict, fix: dict) -> Repair | None:
         preview = f"vars.{var_name}: {current} -> {current}${{rand:6}}"
         safe = True
 
+    confidence = _derive_confidence({
+        "located_var": True,
+        "known_unique_key": field_key in _UNIQUE_HINTS,
+        "explicit_field_key": bool(field_key),
+    })
+
     return Repair(
         id=f"refresh_var_{var_name}",
         title="为唯一变量追加随机后缀",
         reason="重复错误通常来自编号、名称、手机号或邮箱等唯一字段复用旧值。",
         operation="refresh_unique_var",
-        confidence=str(fix.get("confidence") or "medium"),
+        confidence=confidence,
         safe_to_apply=safe,
         preview=preview,
         target={"var_name": var_name},
@@ -205,7 +254,7 @@ def _plan_missing_required(case: dict, fix: dict) -> Repair | None:
             title="补充必填字段",
             reason="检测到必填缺失，但未能推断字段 key。",
             operation="insert_missing_field",
-            confidence="low",
+            confidence=_derive_confidence({"unresolved": True}),
             safe_to_apply=False,
             preview=str(fix.get("patch_yaml") or "请手工确认字段 key 后插入填写步骤。"),
         )
@@ -215,6 +264,13 @@ def _plan_missing_required(case: dict, fix: dict) -> Repair | None:
     step_type, value, safe = _suggest_missing_value(field_key, fix)
     if not form_id or not app_id:
         safe = False
+
+    confidence = _derive_confidence({
+        "explicit_field_key": True,
+        "has_form_app": bool(form_id and app_id),
+        "known_unique_key": field_key.lower() in _UNIQUE_HINTS,
+        "trusted_value": safe,
+    })
 
     step_id = f"auto_fill_{field_key.lower()}"
     if step_type == "pick_basedata":
@@ -240,12 +296,62 @@ def _plan_missing_required(case: dict, fix: dict) -> Repair | None:
         title=f"补充必填字段 {field_key}",
         reason=str(fix.get("diagnosis") or "业务必填字段缺失。"),
         operation="insert_missing_field",
-        confidence=str(fix.get("confidence") or ("medium" if safe else "low")),
+        confidence=confidence,
         safe_to_apply=safe,
         preview=f"在第 {insert_at + 1} 个步骤前插入: {step}",
         target={"insert_index": insert_at, "field_key": field_key},
         payload={"step": step},
     )
+
+
+def _plan_invalid_value(case: dict, fix: dict) -> Repair | None:
+    """处理格式/业务约束不合法的字段值。
+
+    格式类错误（如“格式不正确/不允许/超出”）的准确约束未知，自动改值风险较高：
+    - 仅当能精确定位到变量、且当前值含旧随机片段时，才提出“重置随机片段”的可安全应用建议；
+    - 其余情况一律保守（safe_to_apply=False），只给建议不自动改值。
+    """
+    vars_map = case.get("vars") or {}
+    if not isinstance(vars_map, dict):
+        return None
+
+    field_key = str(fix.get("field_key") or "").lower()
+    field_caption = str(fix.get("field_caption") or "")
+    var_name = _find_unique_var(vars_map, field_key, field_caption)
+    if not var_name:
+        return Repair(
+            id="refresh_invalid_value_unresolved",
+            title="修正不合法字段值",
+            reason="检测到字段值不符合业务约束，但未能定位对应 vars 变量。",
+            operation="refresh_invalid_value",
+            confidence=_derive_confidence({"unresolved": True}),
+            safe_to_apply=False,
+            preview="请手工检查对应字段的格式约束（长度/字符集/范围）后调整变量模板。",
+            target={"field_key": field_key, "field_caption": field_caption},
+        )
+
+    current = str(vars_map.get(var_name) or "")
+    # 格式约束未知：始终不自动改值，仅给出建议。
+    confidence = _derive_confidence({
+        "located_var": True,
+        "explicit_field_key": bool(field_key),
+    })
+    return Repair(
+        id=f"refresh_invalid_value_{var_name}",
+        title="调整不合法字段值",
+        reason="字段值不符合目标环境的格式/长度/字符集约束；由于约束未知，仅给出建议不自动改值。",
+        operation="refresh_invalid_value",
+        confidence=confidence,
+        safe_to_apply=False,
+        preview=f"vars.{var_name}: 当前值 {current!r} 可能超长或含不允许字符，请调整模板后重试。",
+        target={"var_name": var_name},
+    )
+
+
+def _apply_refresh_invalid_value(case: dict, repair: dict) -> tuple[dict, bool, str]:
+    # 格式类修复默认不可自动应用；apply_repair 已按 safe_to_apply 门控。
+    # 此处作为兵底：即使被误调用也不静默改值。
+    return case, False, "格式类问题约束未知，不支持自动改值，请手工确认后调整变量模板。"
 
 
 def _apply_mark_step_optional(case: dict, repair: dict) -> tuple[dict, bool, str]:

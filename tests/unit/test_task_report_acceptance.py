@@ -421,3 +421,63 @@ def test_decision_summary_separates_confirmed_and_unconfirmed_write_evidence():
     assert summary["confirmed"]
     assert summary["unconfirmed"] == ["目标环境中是否真实存在本次运行写入的数据"]
     assert "不要把保存成功当成入库成功" in summary["next_step"]
+
+
+def test_infer_write_status_accepts_response_contract_gate_as_verified():
+    """响应契约级入库：门槛 verified+response_contract 时，无回查断言也认定已入库。"""
+    result = CaseResult(
+        name="case_response_contract",
+        passed=True,
+        phases=[
+            {
+                "id": "step:save_main",
+                "label": "点击保存",
+                "status": "ok",
+                "response": {"msg": "保存成功"},
+            }
+        ],
+        runtime_evidence={
+            "first_success_gate": {
+                "status": "verified",
+                "verified": True,
+                "verification_method": "response_contract",
+            },
+        },
+    )
+
+    status, evidence = infer_write_status(result)
+
+    assert status == "verified"
+    assert "first_success_gate:response_contract" in evidence["signals"]
+    assert evidence["write_verified"] is True
+
+
+def test_enrich_case_result_records_response_contract_verification_method():
+    """enrich 后 write_verification_method 应为 response_contract 且能透传到 to_dict。"""
+    result = CaseResult(
+        name="case_response_contract",
+        passed=True,
+        phases=[
+            {
+                "id": "step:save_main",
+                "label": "点击保存",
+                "status": "ok",
+                "response": {"msg": "保存成功"},
+            }
+        ],
+        runtime_evidence={
+            "first_success_gate": {
+                "status": "verified",
+                "verified": True,
+                "verification_method": "response_contract",
+            },
+        },
+    )
+
+    enrich_case_result(result)
+
+    assert result.write_status == "verified"
+    assert result.write_verification_method == "response_contract"
+    assert result.next_action == "none"
+    assert result.to_dict()["write_verification_method"] == "response_contract"
+

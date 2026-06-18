@@ -328,6 +328,7 @@ def build_case_write_anchor_plan(case: Mapping[str, Any] | None) -> dict[str, An
             "expected_pageid_role": str(step.get("expected_pageid_role") or ""),
             "response_contract_level": str(contract.get("contract_level") or ""),
             "response_contract_strength": str(contract.get("contract_strength") or ""),
+            "recorded_response_outcome": str(contract.get("outcome") or ""),
             "has_request_contract": bool(step.get("expected_request_signature")),
             "has_response_contract": bool(contract),
             "optional": bool(step.get("optional")),
@@ -379,6 +380,7 @@ def evaluate_first_success_gate(
             "schema_version": SCHEMA_VERSION,
             "status": "not_applicable",
             "verified": bool(passed),
+            "verification_method": "",
             "summary": "只读用例不适用写入首次成功门槛。",
             "checks": {},
             "missing": [],
@@ -412,6 +414,22 @@ def evaluate_first_success_gate(
     ]
     readback_verified = any(item.get("ok") and not item.get("advisory") for item in readbacks)
     manual_verified = bool(evidence.get("manual_write_verified"))
+    # 响应契约级入库证据：所有写入锚点在原始 HAR 中均为成功响应，且回放时
+    # 每个写入锚点的关键请求/响应语义与原始 HAR 逐项对比无差异
+    #（outcome、success_categories、required_actions、字段回填、列表结构）。
+    # 这是“保存/提交接口返回与原始 HAR 关键信息及 JSON 结构一致”的入库证据，
+    # 作为独立只读回查/人工确认之外的第三条 verified 路径（强度略弱于回查）。
+    write_anchors_recorded_success = bool(anchors) and all(
+        str(item.get("recorded_response_outcome") or "") == "success"
+        for item in anchors
+    )
+    response_contract_verified = bool(
+        anchor_ids
+        and len(response_evaluated) == len(anchor_ids)
+        and request_failures == 0
+        and response_failures == 0
+        and write_anchors_recorded_success
+    )
     maintenance_expected = int(evidence.get("maintenance_expected_count") or 0)
     maintenance_matched = int(evidence.get("maintenance_matched_count") or 0)
 
@@ -427,6 +445,8 @@ def evaluate_first_success_gate(
         "maintenance_matched_count": maintenance_matched,
         "readback_verified": readback_verified,
         "manual_write_verified": manual_verified,
+        "response_contract_verified": response_contract_verified,
+        "write_anchors_recorded_success": write_anchors_recorded_success,
     }
     missing: list[str] = []
     if len(executed) != len(anchor_ids):
@@ -441,7 +461,7 @@ def evaluate_first_success_gate(
         missing.append("maintained_values")
     if hard_assertion_failures:
         missing.append("system_assertions")
-    if not (readback_verified or manual_verified):
+    if not (readback_verified or manual_verified or response_contract_verified):
         missing.append("readback_or_manual_verification")
 
     hard_failure = bool(
@@ -453,17 +473,33 @@ def evaluate_first_success_gate(
         or maintenance_expected != maintenance_matched
         or hard_assertion_failures
     )
-    verified = not hard_failure and (readback_verified or manual_verified)
+    verified = not hard_failure and (
+        readback_verified or manual_verified or response_contract_verified
+    )
+    if readback_verified:
+        verification_method = "readback"
+    elif manual_verified:
+        verification_method = "manual"
+    elif response_contract_verified:
+        verification_method = "response_contract"
+    else:
+        verification_method = ""
     status = "verified" if verified else "failed" if hard_failure else "write_unverified"
     summary = {
         "verified": "首次执行、关键契约、维护值和入库证据均已闭环。",
         "failed": "写入链路未达到首次成功门槛，需修复脚本或目标环境问题。",
         "write_unverified": "执行与关键契约通过，但缺少只读回查或人工入库确认。",
     }[status]
+    if status == "verified" and verification_method == "response_contract":
+        summary = (
+            "首次执行、关键契约、维护值均已闭环；保存/提交响应与原始 HAR 录制"
+            "的成功响应关键语义及结构逐项一致，据此认定入库（未做独立只读回查）。"
+        )
     return {
         "schema_version": SCHEMA_VERSION,
         "status": status,
         "verified": verified,
+        "verification_method": verification_method,
         "summary": summary,
         "checks": checks,
         "missing": missing,

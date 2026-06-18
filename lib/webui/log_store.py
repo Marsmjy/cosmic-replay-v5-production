@@ -173,8 +173,11 @@ class LogStore:
         if not runs_dir.exists():
             return []
         items = []
+        # 主键 mtime 倒序；mtime 相同时（同一测试/同一毫秒内创建）以 run_id 倒序兜底，
+        # 保证"最新在前"语义稳定，避免退化为 glob 名字升序导致的乱序。
         for f in sorted(runs_dir.glob("*.jsonl"),
-                        key=lambda p: p.stat().st_mtime, reverse=True)[:limit]:
+                        key=lambda p: (p.stat().st_mtime, p.stem),
+                        reverse=True)[:limit]:
             run_id = f.stem
             mtime = f.stat().st_mtime
             # 粗读：从首行拿 case_start，末行拿 case_done

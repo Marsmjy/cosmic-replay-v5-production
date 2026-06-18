@@ -3591,6 +3591,11 @@
                           :class="writeStatusClass(r.write_status)"
                           :title="writeStatusHelp(r)"
                           x-text="writeStatusLabel(r.write_status)"></span>
+                    <div x-show="r.write_status === 'verified' && r.write_verification_method"
+                         class="text-[10px] mt-1 cursor-help"
+                         :class="verificationMethodClass(r.write_verification_method)"
+                         :title="verificationMethodHelp(r.write_verification_method)"
+                         x-text="verificationMethodLabel(r.write_verification_method)"></div>
                     <div x-show="r.write_status === 'unverified'"
                          class="text-[10px] text-amber-400 mt-1"
                          x-text="writeEvidenceSummary(r)"></div>
@@ -6347,12 +6352,37 @@ function app() {
 
     writeStatusHelp(row) {
       const status = row?.write_status || 'not_checked';
+      const method = row?.write_verification_method || '';
+      if (status === 'verified' && method === 'response_contract') return '已验证（响应契约）：保存/提交响应与原始 HAR 录制的成功响应关键语义及 JSON 结构逐项一致，据此认定真实入库（强度略弱于独立只读回查）。';
       if (status === 'verified') return '已验证：已通过业务键或附件字段的后置只读回查确认真实入库。';
       if (status === 'manual_verified') return '人工确认：用户已确认该用例真实入库；后续同用例 PASS 时不再提示 AI 诊断。';
       if (status === 'unverified') return '待回查：用例可能已有保存/提交成功响应，但尚未通过独立业务键回查。补入库断言后重新运行，系统会自动变为已验证。';
       if (status === 'failed') return '失败：保存/提交阶段失败，不能视为入库成功。';
       if (status === 'not_applicable') return '不适用：本用例未识别到保存/提交类写库步骤。';
       return '未检查：当前报告没有足够执行证据。';
+    },
+
+    verificationMethodLabel(method) {
+      return {
+        readback: '只读回查',
+        response_contract: '响应契约',
+        manual: '人工确认',
+      }[method] || '';
+    },
+
+    verificationMethodClass(method) {
+      return {
+        readback: 'text-emerald-400',
+        response_contract: 'text-teal-400',
+        manual: 'text-sky-400',
+      }[method] || 'text-slate-400';
+    },
+
+    verificationMethodHelp(method) {
+      if (method === 'readback') return '只读回查：通过业务键/附件字段的独立只读查询确认真实入库（最强证据）。';
+      if (method === 'response_contract') return '响应契约：保存/提交响应与原始 HAR 录制的成功响应关键语义及 JSON 结构逐项一致，据此认定入库（强度略弱于独立回查）。';
+      if (method === 'manual') return '人工确认：用户已人工确认真实入库。';
+      return '';
     },
 
     writeEvidenceSummary(row) {
@@ -6388,6 +6418,7 @@ function app() {
           throw new Error(data.detail || data.error || resp.status);
         }
         row.write_status = 'manual_verified';
+        row.write_verification_method = 'manual';
         row.write_verification = data.write_verification || {};
         row.next_action = 'none';
         row.ai_reason = '';

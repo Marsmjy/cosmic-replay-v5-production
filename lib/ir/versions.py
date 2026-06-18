@@ -20,6 +20,8 @@ CURRENT_VERSIONS = {
     "case_contract": "1.0",
     "result_evidence": "1.0",
     "rule": "1.0",
+    "ir_contract": "1.0",
+    "navigation_policy": "1.0",
 }
 
 SUPPORTED_VERSIONS = {

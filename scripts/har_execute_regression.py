@@ -332,6 +332,8 @@ def _execution_env() -> dict[str, str]:
             merged.append(item)
     env["NO_PROXY"] = ",".join(merged)
     env["no_proxy"] = env["NO_PROXY"]
+    # Windows 控制台默认 GBK 编码，无法输出 ✅ 等 Unicode 字符导致子进程 print 崩溃
+    env["PYTHONIOENCODING"] = "utf-8"
     return env
 
 
@@ -396,6 +398,7 @@ def _summary_from_evidence(evidence_path: Path, *, returncode: int, duration_s: 
         "maintenance_matched_count": summary.get("maintenance_matched_count", 0),
         "first_success_verified": bool(summary.get("first_success_verified")),
         "first_success_status": summary.get("first_success_status", ""),
+        "first_success_verification_method": summary.get("first_success_verification_method", ""),
         "first_success_missing": summary.get("first_success_missing", []),
         "evidence_path": str(evidence_path),
     }
@@ -421,6 +424,8 @@ def _run_smoke(case_path: Path, evidence_path: Path, *, env_id: str, timeout_s: 
             cwd=PROJECT_ROOT,
             env=_execution_env(),
             text=True,
+            encoding="utf-8",
+            errors="replace",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             timeout=timeout_s,
@@ -447,8 +452,8 @@ def _run_smoke(case_path: Path, evidence_path: Path, *, env_id: str, timeout_s: 
         status="done",
     )
     result.update({
-        "stdout_tail": completed.stdout[-2000:],
-        "stderr_tail": completed.stderr[-2000:],
+        "stdout_tail": (completed.stdout or "")[-2000:],
+        "stderr_tail": (completed.stderr or "")[-2000:],
     })
     return result
 

@@ -342,6 +342,85 @@ def test_first_success_gate_distinguishes_verified_and_unverified_write():
     assert unverified["missing"] == ["readback_or_manual_verification"]
     assert verified["status"] == "verified"
     assert verified["verified"] is True
+    assert verified["verification_method"] == "readback"
+
+
+def test_first_success_gate_accepts_response_contract_match_as_write_evidence():
+    """保存/提交响应与原始 HAR 录制的成功响应关键语义及结构逐项一致
+    时，即使没有独立只读回查也可认定入库（第三条 verified 路径）。"""
+    case = {
+        "steps": [{
+            "id": "save_main",
+            "type": "invoke",
+            "ac": "save",
+            "ir_write_anchor": True,
+            "ir_write_kind": "write_save",
+            "expected_request_signature": {"contract_level": "critical"},
+            "expected_response_signature": {
+                "contract_level": "critical",
+                "outcome": "success",
+            },
+        }],
+        "assertions": [{"type": "no_save_failure", "step": "save_main"}],
+    }
+    evidence = {
+        "request_contract_results": {"save_main": {"errors": [], "warnings": []}},
+        "response_contract_results": {
+            "save_main": {"contract_level": "critical", "errors": [], "warnings": []},
+        },
+        "maintenance_expected_count": 1,
+        "maintenance_matched_count": 1,
+    }
+    gate = evaluate_first_success_gate(
+        case,
+        passed=True,
+        assertions=[{"type": "no_save_failure", "ok": True}],
+        runtime_evidence=evidence,
+        executed_step_ids={"save_main"},
+        response_step_ids={"save_main"},
+    )
+
+    assert gate["status"] == "verified"
+    assert gate["verified"] is True
+    assert gate["verification_method"] == "response_contract"
+    assert gate["checks"]["response_contract_verified"] is True
+    assert "readback_or_manual_verification" not in gate["missing"]
+
+
+def test_first_success_gate_response_contract_requires_recorded_success():
+    """原始 HAR 写入锚点响应未标记为 success 时，不能走响应契约入库路径。"""
+    case = {
+        "steps": [{
+            "id": "save_main",
+            "type": "invoke",
+            "ac": "save",
+            "ir_write_anchor": True,
+            "ir_write_kind": "write_save",
+            "expected_request_signature": {"contract_level": "critical"},
+            "expected_response_signature": {"contract_level": "critical"},
+        }],
+        "assertions": [{"type": "no_save_failure", "step": "save_main"}],
+    }
+    evidence = {
+        "request_contract_results": {"save_main": {"errors": [], "warnings": []}},
+        "response_contract_results": {
+            "save_main": {"contract_level": "critical", "errors": [], "warnings": []},
+        },
+        "maintenance_expected_count": 1,
+        "maintenance_matched_count": 1,
+    }
+    gate = evaluate_first_success_gate(
+        case,
+        passed=True,
+        assertions=[{"type": "no_save_failure", "ok": True}],
+        runtime_evidence=evidence,
+        executed_step_ids={"save_main"},
+        response_step_ids={"save_main"},
+    )
+
+    assert gate["status"] == "write_unverified"
+    assert gate["verification_method"] == ""
+    assert gate["checks"]["response_contract_verified"] is False
 
 
 def test_ir_navigation_policy_uses_exact_action_provenance():

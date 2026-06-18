@@ -88,6 +88,43 @@ class TestHealthEndpoint:
         assert isinstance(data["cases_count"], int)
 
 
+class TestMetricsEndpoint:
+    """可观测性：Prometheus /metrics 端点与认证放行"""
+
+    @pytest.fixture
+    def client(self):
+        try:
+            from fastapi.testclient import TestClient
+            from lib.webui.server import APP, _HAS_OBSERVABILITY
+            if not _HAS_OBSERVABILITY:
+                pytest.skip("可观测性依赖未安装（如 prometheus_client）")
+            return TestClient(APP)
+        except ImportError:
+            pytest.skip("FastAPI TestClient not available")
+
+    def test_metrics_returns_200(self, client):
+        """/metrics 返回 200"""
+        resp = client.get("/metrics")
+        assert resp.status_code == 200
+
+    def test_metrics_exposes_prometheus_format(self, client):
+        """暴露 Prometheus 文本格式指标"""
+        resp = client.get("/metrics")
+        body = resp.text
+        # 应包含应用自定义指标前缀
+        assert "cosmic_replay_" in body
+
+    def test_health_passes_through_without_auth(self, client):
+        """开发模式下 health 不被认误拦截（默认放行）"""
+        resp = client.get("/api/health")
+        assert resp.status_code == 200
+
+    def test_metrics_passes_through_without_auth(self, client):
+        """/metrics 始终放行，不被认证中间件拦截"""
+        resp = client.get("/metrics")
+        assert resp.status_code == 200
+
+
 class TestInfoEndpoint:
     """信息端点测试"""
     
@@ -130,8 +167,17 @@ class TestWebUiEntrypoints:
 
         return TestClient(APP)
 
-    def test_root_serves_vnext_by_default(self, client, monkeypatch):
+    def test_root_serves_legacy_by_default(self, client, monkeypatch):
+        # 主线决策（commit 349c71c）：默认前端为 legacy，vnext 需显式设环境变量
         monkeypatch.delenv("COSMIC_WEBUI_MODE", raising=False)
+
+        response = client.get("/")
+
+        assert response.status_code == 200
+        assert "x-data=\"app()\"" in response.text
+
+    def test_root_serves_vnext_when_flag_enabled(self, client, monkeypatch):
+        monkeypatch.setenv("COSMIC_WEBUI_MODE", "vnext")
 
         response = client.get("/")
 
