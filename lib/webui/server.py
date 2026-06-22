@@ -1558,7 +1558,9 @@ async def api_har_preview(request: Request):
     save_path.write_bytes(content)
 
     # ⭐ 提取环境参数，确定元数据状态
-    env_id = request.query_params.get("env_id", "")
+    # 与 extract/resolve/run 等接口保持一致：env_id 缺省时回退到默认环境，
+    # 避免前端未带 env_id（如初始化竞态/选择器未同步）时被误判为“离线模式”。
+    env_id = request.query_params.get("env_id", "") or CONFIG.webui.default_env
     metadata_status = "offline"  # offline / online / degraded
 
     if env_id:
