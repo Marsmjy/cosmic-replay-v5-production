@@ -275,6 +275,25 @@ def _binding_row(
             "match_reason": "+".join(reasons),
         })
     runtime_supported = panel == "vars" or _runtime_pick_injection_supported(field_id, meta)
+    # env_*_treeview_focus 的可执行落点是其来源 addnew 步骤本身：运行时由 runner 按
+    # step_id（field_id 去掉 env_ 前缀与 _treeview_focus 后缀）注入到该步骤 post_data 的
+    # treeview.focus.id。常规 field_key/form 匹配无法覆盖这种 post_data 内嵌注入，
+    # 这里按 step_id 直接判定绑定，避免被误判为 unbound 而拦截 HAR 生成。
+    if (
+        not matches
+        and runtime_supported
+        and field_id.startswith("env_")
+        and field_id.endswith("_treeview_focus")
+    ):
+        tree_step_id = field_id[4:-15]
+        for target in targets:
+            if target.get("step_id") == tree_step_id:
+                matches.append({
+                    "step_id": target.get("step_id", ""),
+                    "step_type": target.get("step_type", ""),
+                    "match_reason": "treeview_focus_step",
+                })
+                break
     status = "bound" if matches and runtime_supported else "unbound"
     return {
         "id": field_id,

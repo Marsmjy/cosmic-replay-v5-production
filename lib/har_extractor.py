@@ -103,6 +103,10 @@ _CORE_TOOLBAR_KEYS = {"toolbarap", "tbmain", "toolbar"}
 # 这类 save 按钮的 ac 是 click 而非 saveandeffect，但属于业务核心操作
 _SAVE_BUTTON_KEYS = {"btnsave", "btnsaveandnew", "btnsaveaddnew", "btnsavenew"}
 
+# ⭐ 聚合提交动作：苍穹保存/提交时把整表字段一次性发出（postData 与 updateValue 同构）。
+# recover_save_residual_update_fields 用它识别提交步骤，从中补回攒到提交才发的纯文本字段。
+_SUBMIT_ACS = {"save", "saveandeffect", "saveandnew", "submit", "submitandeffect"}
+
 # click 但属于业务流程入口的按钮。若被 optional 吞掉，后续可能出现
 # “执行 PASS 但只保存主单/部分明细”的半成功。
 _CORE_CLICK_KEYS = {"newentry", "bizitemgroup", "adminorg", "khr_cost_org"}
@@ -3037,6 +3041,91 @@ def merge_consecutive_update_values(steps: list[dict]) -> list[dict]:
             else:
                 out.append(s)
             i += 1
+    return out
+
+
+def recover_save_residual_update_fields(steps: list[dict]) -> list[dict]:
+    """从提交动作(save/submit 类)的聚合 postData 中补回未经独立 updateValue 维护的纯文本字段。
+
+    某些纯文本字段（如知识要求 knowledgereq、技能要求 skillreq、能力要求 abilityreq、
+    经验要求 experiencereq）在录制时不会逐个触发 updateValue，而是攒到提交动作
+    （save / saveandeffect / submit / submitandeffect 的 itemClick，或 btnsave 类按钮
+    的 click）的 postData 里一次性提交。常规链路只把独立 updateValue 解析为
+    update_fields，导致这些字段在生成的 YAML / 可维护字段中丢失。
+
+    该函数与具体表单/字段无关，适用于所有 HAR：仅靠“提交动作”识别 + 去重 +
+    纯文本判断三道闸来决定是否补提，不针对任何业务域写死。补提仅纳入：
+      1) 之前没有以 update_fields / pick_basedata 维护过的字段；
+      2) 值形如纯文本（字符串或多语言 {zh_CN: ...}），排除基础资料等结构化值。
+    被系统托管/锁定的字段交由后续 _drop_locked_update_fields 统一清理。
+    """
+    # 收集已维护字段键（update_fields.fields / pick_basedata.field_key）
+    existing_keys: set[str] = set()
+    for s in steps:
+        if s.get("type") == "update_fields" and isinstance(s.get("fields"), dict):
+            for k in s["fields"].keys():
+                existing_keys.add(str(k).strip().lower())
+        elif s.get("type") == "pick_basedata" and s.get("field_key"):
+            existing_keys.add(str(s["field_key"]).strip().lower())
+
+    def _is_plain_text_value(v: Any) -> bool:
+        if isinstance(v, str):
+            return True
+        if isinstance(v, dict) and "zh_CN" in v:
+            return True
+        return False
+
+    def _is_submit_step(s: dict) -> bool:
+        """识别各种聚合提交动作（跨表单通用）。"""
+        if s.get("type") != "invoke":
+            return False
+        ac = str(s.get("ac") or "")
+        method = str(s.get("method") or "")
+        ctrl_key = str(s.get("key") or "")
+        # itemClick + 提交类 ac
+        if method == "itemClick" and ac in _SUBMIT_ACS:
+            return True
+        # 保存类按钮被录成 click（ac=click/save等）+ btnsave* key
+        if ctrl_key in _SAVE_BUTTON_KEYS:
+            return True
+        return False
+
+    out: list[dict] = []
+    for s in steps:
+        if not _is_submit_step(s):
+            out.append(s)
+            continue
+        # 提交动作的 postData 与 updateValue 同构：[meta, [{"k":..,"v":..,"r":..}]]
+        residual: dict[str, Any] = OrderedDict()
+        for k, v in _extract_update_fields(s.get("post_data") or []).items():
+            key_norm = str(k).strip().lower()
+            if key_norm in existing_keys:
+                continue
+            if not _is_plain_text_value(v):
+                continue
+            residual[k] = v
+            existing_keys.add(key_norm)
+        if residual:
+            primary_key = list(residual.keys())[0]
+            suffix = "_etc" if len(residual) > 1 else ""
+            fill_step: dict[str, Any] = {
+                "type": "update_fields",
+                "id": f"fill_{_sanitize(primary_key) or 'fields'}{suffix}",
+                "form_id": s.get("form_id", ""),
+                "app_id": s.get("app_id", ""),
+                "fields": residual,
+                "_tier": "core",
+                "_har_index": s.get("_har_index"),
+                "_har_action_index": s.get("_har_action_index"),
+                "ir_sources": _collect_ir_sources([s]),
+                "_har_page_id": s.get("_har_page_id", ""),
+                "_source": "save_residual",
+            }
+            row_idx = _extract_row_index(s.get("post_data") or [])
+            if row_idx >= 0:
+                fill_step["row_index"] = row_idx
+            out.append(fill_step)
+        out.append(s)
     return out
 
 
@@ -6861,6 +6950,7 @@ def build_yaml_case(
     raw_steps = relocate_premature_open_forms(raw_steps)
     raw_steps = lower_set_item_to_pick_basedata(raw_steps)
     raw_steps = merge_consecutive_update_values(raw_steps)
+    raw_steps = recover_save_residual_update_fields(raw_steps)
     raw_steps = collapse_repeated_polling_steps(raw_steps)
     raw_steps = insert_workflow_task_wait_steps(raw_steps)
     raw_steps = _drop_locked_update_fields(raw_steps, field_observations)
@@ -8070,6 +8160,7 @@ def preview_har(har_path: Path, meta_resolver=None) -> dict:
     raw_steps = relocate_premature_open_forms(raw_steps)
     raw_steps = lower_set_item_to_pick_basedata(raw_steps)
     raw_steps = merge_consecutive_update_values(raw_steps)
+    raw_steps = recover_save_residual_update_fields(raw_steps)
     raw_steps = collapse_repeated_polling_steps(raw_steps)
     raw_steps = insert_workflow_task_wait_steps(raw_steps)
     raw_steps = _drop_locked_update_fields(raw_steps, field_observations)
