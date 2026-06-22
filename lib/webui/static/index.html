@@ -2139,6 +2139,7 @@
                         <div class="flex justify-end gap-1 mb-0.5">
                           <span class="text-[10px] rounded px-1.5 py-0.5"
                                 :class="harMaintenancePriorityClass(item)"
+                                :title="harMaintenancePriorityHint(item)"
                                 x-text="harMaintenancePriorityLabel(item)"></span>
                           <span class="text-[10px] rounded px-1.5 py-0.5"
                                 :class="harPickResolveClass(item.ref)"
@@ -5696,6 +5697,8 @@ function app() {
         const recorded = recordedName ? `录制文件：${recordedName}` : '本地文件路径';
         return `${recorded}，请填写本机可访问路径`;
       }
+      // 方案A：软必填上下文字段占位符提示可留空，避免被误认为强制录入。
+      if (pf?.required_context) return '可留空，或填业务编码覆盖';
       return pf?.value_code || pf?.value_name || '业务编码 / value_id';
     },
 
@@ -5930,7 +5933,9 @@ function app() {
     harMaintenancePriorityLabel(item) {
       const ref = item?.ref || {};
       if (ref.source_type === 'upload_file' && !String(ref.value_id || '').trim()) return '必填';
-      if (ref.required_context || ref.required || ref.env_sensitive === 'high') return '必填';
+      // 方案A：软必填上下文字段（系统按业务规则注入）通常无需修改、可留空，不再误标“必填”红标。
+      if (ref.required_context) return '可留空';
+      if (ref.required || ref.env_sensitive === 'high') return '必填';
       if (ref.env_sensitive === 'medium') return '建议';
       return '可选';
     },
@@ -5939,7 +5944,17 @@ function app() {
       const label = this.harMaintenancePriorityLabel(item);
       if (label === '必填') return 'bg-red-900/60 text-red-200';
       if (label === '建议') return 'bg-amber-900/60 text-amber-200';
+      if (label === '可留空') return 'bg-slate-700 text-slate-200';
       return 'bg-slate-800 text-slate-300';
+    },
+
+    harMaintenancePriorityHint(item) {
+      const ref = item?.ref || {};
+      if (ref.required_context) {
+        const reason = String(ref.reason || '').trim();
+        return reason || '系统按目标环境业务规则提示维护，通常无需修改，留空将沿用运行时解析';
+      }
+      return '';
     },
 
     harPickResolveLabel(pf = {}) {
