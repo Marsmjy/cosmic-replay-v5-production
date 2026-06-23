@@ -2113,6 +2113,22 @@ def _a_maintained_value_applied(assert_spec: dict, ctx: dict) -> tuple[bool, str
             continue
         matches.append(item)
     if not matches:
+        # ⭐ 放宽校验：若按 step_id 严格过滤后无匹配，再尝试不带 step_id 过滤。
+        # 这处理的情况是：HAR 提取器将 pick_field 的 source_step_id 绑定到表单打开步骤
+        # （如 open_xxx），但实际值在后续步骤（如 pick_xxx）中被消费。只要值在某个
+        # 步骤中被成功消费，就不应判失败，否则会导致步骤全过、保存成功的用例误报失败。
+        relaxed = []
+        for item in ctx.get("maintenance_value_trace") or []:
+            if not isinstance(item, dict):
+                continue
+            if str(item.get("id") or "") != target_id:
+                continue
+            if kind and str(item.get("kind") or "") != kind:
+                continue
+            relaxed.append(item)
+        if relaxed and any(item.get("matched") for item in relaxed):
+            actual_steps = [str(item.get("source_step_id") or "?") for item in relaxed[:3]]
+            return True, f"✅ {target_id} 的维护值已在步骤 {actual_steps} 中进入回放请求（非原始绑定步骤 {step_id}）"
         # 软必填上下文字段（required_context）设计上允许留空：若本次并未
         # 维护具体值（value_id/name/code 均空），则不应判失败，否则会让整条
         # 用例误报为执行失败；仅当软必填字段确实填了值时才继续校验。
