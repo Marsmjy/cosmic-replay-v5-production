@@ -2402,7 +2402,24 @@ def detect_var_placeholders(actions_seq: list[dict], meta_resolver=None) -> tupl
                 seen_values[val] = vname
                 return f"${{vars.{vname}}}"
             return f"${{vars.{seen_values[val]}}}"
-        return val
+        # 兜底：未被分类器识别但非空的字符串值也抽成文本变量，
+        # 让用户能在变量面板维护（如年龄要求、知识要求等纯文本录入字段）。
+        # 先用 kb 一票否决排除枚举/基础资料/系统字段。
+        if _kb is not None and current_form_id:
+            try:
+                kb_cls = _kb.classify_field(current_form_id, key_hint, meta_resolver=meta_resolver)
+                if kb_cls in ("B", "ignore", "C"):
+                    return val
+            except Exception:
+                pass
+        vname = _text_var_name(key_hint)
+        if vname not in vars_map:
+            vars_map[vname] = val
+            label = _resolve_field_label(key_hint, entity_id=current_form_id, meta_resolver=meta_resolver)
+            if label and label != key_hint:
+                vars_labels[vname] = label
+        seen_values[val] = vname
+        return f"${{vars.{vname}}}"
 
     def walk_update_fields(postData: list):
         if not (isinstance(postData, list) and len(postData) >= 2):
