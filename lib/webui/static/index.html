@@ -5881,8 +5881,9 @@ function app() {
 
     _harMaintenanceOrder(item, stepOrder) {
       const ref = item?.ref || {};
-	      if (Number.isFinite(ref._catalog_order) && ref._catalog_order < 99999) return ref._catalog_order;
+	      // 字段自带 order 是 HAR 录制顺序的权威固化，最优先；其次才用字段目录推断顺序。
 	      if (Number.isFinite(Number(ref.order))) return Number(ref.order);
+	      if (Number.isFinite(ref._catalog_order) && ref._catalog_order < 99999) return ref._catalog_order;
 	      const source = ref.source_step_id || ref.step_id || ref.id || ref.name || ref.key || '';
       if (source && stepOrder.has(source)) return stepOrder.get(source);
       const write = ref.write_step_id || '';
@@ -6025,11 +6026,14 @@ function app() {
           group_label: pf.group_label || pf.form_label || '环境字段',
         });
       }
-      return items.sort((a, b) => {
+      const sorted = items.sort((a, b) => {
         if (a.order !== b.order) return a.order - b.order;
         if (a.kind !== b.kind) return a.kind === 'var' ? -1 : 1;
         return String(a.label).localeCompare(String(b.label));
       });
+      // 序号按排序后连续行号显示，避免 order 相同的字段出现重复序号。
+      sorted.forEach((it, idx) => { it.orderLabel = it.order < 99999 ? String(idx + 1) : ''; });
+      return sorted;
     },
 
     harMaintenanceGroups() {
@@ -6221,11 +6225,14 @@ function app() {
 	          group_label: pf.group_label || pf.form_label || '选择字段',
 	        });
 	      }
-	      return items.sort((a, b) => {
+	      const sorted = items.sort((a, b) => {
 	        if (a.order !== b.order) return a.order - b.order;
 	        if (a.kind !== b.kind) return a.kind === 'var' ? -1 : 1;
 	        return String(a.label).localeCompare(String(b.label));
 	      });
+	      // 序号按排序后连续行号显示，避免 order 相同的字段出现重复序号。
+	      sorted.forEach((it, idx) => { it.orderLabel = it.order < 99999 ? String(idx + 1) : ''; });
+	      return sorted;
 	    },
 
 	    caseMaintenanceGroups() {
@@ -8575,6 +8582,10 @@ function app() {
           resolve_status: entry.resolve_status || '',
           context_only: entry.context_only === 'true' || entry.context_only === true,
           readonly: entry.readonly === 'true' || entry.readonly === true,
+          // 方案A：透传软必填上下文标记，否则用例详情变量面板会把这些字段误判为“必填”。
+          required_context: entry.required_context === 'true' || entry.required_context === true,
+          reason: entry.reason || '',
+          base_entity: entry.base_entity || '',
         };
       }).sort((a, b) => {
         const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : 99999;

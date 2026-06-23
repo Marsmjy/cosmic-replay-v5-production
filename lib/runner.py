@@ -2108,6 +2108,17 @@ def _a_maintained_value_applied(assert_spec: dict, ctx: dict) -> tuple[bool, str
             continue
         matches.append(item)
     if not matches:
+        # 软必填上下文字段（required_context）设计上允许留空：若本次并未
+        # 维护具体值（value_id/name/code 均空），则不应判失败，否则会让整条
+        # 用例误报为执行失败；仅当软必填字段确实填了值时才继续校验。
+        pf_meta = ((ctx.get("case") or {}).get("pick_fields") or {}).get(target_id)
+        if isinstance(pf_meta, dict) and pf_meta.get("required_context"):
+            _has_value = any(
+                str(pf_meta.get(k) or "").strip()
+                for k in ("value_id", "value_name", "value_code", "value_number")
+            )
+            if not _has_value:
+                return True, f"☑ {target_id} 为软必填上下文字段且未维护具体值，按「可留空」跳过校验"
         return False, f"{target_id} 没有记录到维护值消费证据"
     if any(item.get("matched") for item in matches):
         return True, f"✅ {target_id} 的维护值已进入目标回放请求"
