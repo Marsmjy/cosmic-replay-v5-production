@@ -5182,8 +5182,11 @@ def _yaml_scalar(v: Any, key: Any | None = None) -> str:
     if s and re.match(r"^0\d+$", s):
         return json.dumps(s, ensure_ascii=False)
     # ⭐ 规则1：纯数字字符串必须加引号，否则 YAML 解析器会转成整数
-    # Java 服务端通过 beanutils 反射调用，需要 String 类型匹配方法签名
-    if s and _RX_INTEGER.match(s) and len(s) >= 6:
+    # Java 服务端通过 beanutils 反射调用，需要 String 类型匹配方法签名。
+    # 不论长度都必须加引号：即使是 "33" 这样短的数字，如果原始 HAR 录制为字符串，
+    # 写入多语言文本字段时服务端 MuliLangTextProp.setValuePrivate 也会因
+    # Integer cannot be cast to java.lang.String 抛 ClassCastException。
+    if s and _RX_INTEGER.match(s):
         return json.dumps(s, ensure_ascii=False)
     # ⭐ 日期格式加引号：防止 YAML 解析器把 2026-04-24 解析为 datetime.date 对象
     if re.match(r"^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?)?$", s):
