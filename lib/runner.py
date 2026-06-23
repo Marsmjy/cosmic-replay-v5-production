@@ -776,6 +776,11 @@ def _h_invoke(step: dict, replay: CosmicFormReplay, ctx: dict) -> Any:
         "args": step.get("args", []),
         "postData": step.get("post_data", [{}, []]),
     }
+    # ⭐ 批量 invoke 合并：HAR 录制时一个 HTTP 请求可能包含多个 action（如 entryRowClick + click），
+    # 提取器拆分为独立步骤后，回放时需要合并回单个批量调用，否则服务端会丢失 action 间的上下文。
+    actions = [action]
+    for _extra in step.get("_batch_extra_actions") or []:
+        actions.append(_extra)
     # invalidate_pages: 执行前清除指定表单的旧 pageId（如 saveandeffect 后表单上下文已变）
     for fid in step.get("invalidate_pages", []):
         replay.page_ids.pop(fid, None)
@@ -852,7 +857,7 @@ def _h_invoke(step: dict, replay: CosmicFormReplay, ctx: dict) -> Any:
         step["form_id"], step.get("app_id", "bos"), replay, step, ctx
     )
 
-    resp = replay.invoke(step["form_id"], step["app_id"], step["ac"], [action])
+    resp = replay.invoke(step["form_id"], step["app_id"], step["ac"], actions)
 
     ac = step.get("ac", "")
 
@@ -4459,6 +4464,69 @@ def _preflight_write_case(
     return errors
 
 
+def _collect_batch_companion_actions(
+    steps: list[dict],
+) -> tuple[dict[str, list[dict]], set[str]]:
+    """识别同源 HAR 批量 invoke 步骤，返回 (companion_actions_map, merged_step_ids)。
+
+    HAR 录制时一个 HTTP 请求（batchInvokeAction.do）可能包含多个 action
+    （如 entryRowClick + click），提取器拆分为独立 YAML 步骤后，回放时
+    作为独立 invoke 调用会导致服务端丢失 action 间上下文。
+
+    本函数通过 ir_sources[0].source_index 检测同源步骤，将后续步骤的
+    action 数据收集到首步的 _batch_extra_actions 中，并标记后续步骤
+    的 ID 为已合并，主循环跳过这些步骤。
+    """
+    companion_actions: dict[str, list[dict]] = {}
+    merged_ids: set[str] = set()
+
+    # 按 source_index 分组 invoke 步骤的索引
+    groups: dict[int, list[int]] = {}
+    for i, s in enumerate(steps):
+        if s.get("type") != "invoke":
+            continue
+        ir_sources = s.get("ir_sources") or []
+        if not ir_sources or not isinstance(ir_sources, list):
+            continue
+        first_src = ir_sources[0] if ir_sources else {}
+        if not isinstance(first_src, dict):
+            continue
+        si = first_src.get("source_index")
+        if not isinstance(si, int):
+            continue
+        groups.setdefault(si, []).append(i)
+
+    for si, indices in groups.items():
+        if len(indices) < 2:
+            continue
+        first_idx = indices[0]
+        first_step = steps[first_idx]
+        first_form = first_step.get("form_id", "")
+        first_app = first_step.get("app_id", "")
+        first_sid = first_step.get("id") or f"<invoke_{first_idx}>"
+
+        companion_list: list[dict] = []
+        for j in indices[1:]:
+            companion = steps[j]
+            # 必须同 form_id 和 app_id 才能合并到同一批量调用
+            if companion.get("form_id", "") != first_form:
+                break
+            if companion.get("app_id", "") != first_app:
+                break
+            companion_list.append({
+                "key": companion.get("key", ""),
+                "methodName": companion.get("method", ""),
+                "args": companion.get("args", []),
+                "postData": companion.get("post_data", [{}, []]),
+            })
+            merged_ids.add(companion.get("id") or f"<invoke_{j}>")
+
+        if companion_list:
+            companion_actions[first_sid] = companion_list
+
+    return companion_actions, merged_ids
+
+
 def run_case(case: dict, on_event=None) -> RunResult:
     """执行一份用例。返回 RunResult。
 
@@ -4751,7 +4819,10 @@ def run_case(case: dict, on_event=None) -> RunResult:
 
     steps_to_run = [] if preflight_blocked else (case.get("steps") or [])
 
-    for raw_step in steps_to_run:
+    # ⭐ 批量 invoke 合并：检测同源 HAR 步骤，将 companion action 挂载到首步，其余标记跳过
+    _batch_companions, _merged_batch_step_ids = _collect_batch_companion_actions(steps_to_run)
+
+    for _step_idx, raw_step in enumerate(steps_to_run):
         step = resolve_vars(raw_step, vars_ns)
         preparation_errors: list[str] = []
 
@@ -4788,6 +4859,29 @@ def run_case(case: dict, on_event=None) -> RunResult:
         stype = step.get("type")
         sid = step.get("id") or f"<{stype}>"
         optional = bool(step.get("optional"))
+
+        # ⭐ 批量 invoke 合并：跳过已合并到首步的 companion 步骤
+        if sid in _merged_batch_step_ids:
+            result.steps.append({
+                "id": sid,
+                "type": stype,
+                "ok": True,
+                "optional": optional,
+                "detail": _step_detail(step),
+                "merged": True,
+                "warning": "已合并到同源批量 invoke 步骤",
+            })
+            emit("step_ok", {
+                "id": sid,
+                "duration_ms": 0,
+                "skipped": True,
+                "skip_reason": "merged_into_batch_invoke",
+            })
+            continue
+
+        # ⭐ 批量 invoke 合并：为首步注入 companion actions
+        if stype == "invoke" and sid in _batch_companions:
+            step["_batch_extra_actions"] = _batch_companions[sid]
         if stype == "invoke" and step.get("_selector_env_field_meta"):
             _resolve_selector_row_from_recent_grid(step, ctx)
         if stype in ("invoke", "wait_until"):
