@@ -5117,7 +5117,7 @@ def _inject_context_field_steps(
 
 # ---------- YAML 输出 ----------
 
-def to_yaml(data: Any, indent: int = 0) -> str:
+def to_yaml(data: Any, indent: int = 0, _force_string: bool = False) -> str:
     pad = "  " * indent
     if isinstance(data, dict):
         if not data:
@@ -5125,11 +5125,14 @@ def to_yaml(data: Any, indent: int = 0) -> str:
         lines = []
         for k, v in data.items():
             ks = _yaml_key(k)
+            # vars 区域的值一律强制为字符串类型，防止 YAML 反序列化
+            # 把 "11111" 变成 int、"3.14" 变成 float、"true" 变成 bool。
+            child_force = _force_string or (k == "vars")
             if isinstance(v, (dict, list)) and v:
                 lines.append(f"{pad}{ks}:")
-                lines.append(to_yaml(v, indent + 1))
+                lines.append(to_yaml(v, indent + 1, _force_string=child_force))
             else:
-                lines.append(f"{pad}{ks}: {_yaml_scalar(v, key=k)}")
+                lines.append(f"{pad}{ks}: {_yaml_scalar(v, key=k, force_string=child_force)}")
         return "\n".join(lines)
     if isinstance(data, list):
         if not data:
@@ -5137,7 +5140,7 @@ def to_yaml(data: Any, indent: int = 0) -> str:
         lines = []
         for v in data:
             if isinstance(v, dict):
-                inner = to_yaml(v, indent + 1)
+                inner = to_yaml(v, indent + 1, _force_string=_force_string)
                 inner_lines = inner.split("\n")
                 if inner_lines:
                     first = inner_lines[0].lstrip()
@@ -5147,9 +5150,9 @@ def to_yaml(data: Any, indent: int = 0) -> str:
             elif isinstance(v, list):
                 lines.append(f"{pad}- {json.dumps(v, ensure_ascii=False)}")
             else:
-                lines.append(f"{pad}- {_yaml_scalar(v)}")
+                lines.append(f"{pad}- {_yaml_scalar(v, force_string=_force_string)}")
         return "\n".join(lines)
-    return f"{pad}{_yaml_scalar(data)}"
+    return f"{pad}{_yaml_scalar(data, force_string=_force_string)}"
 
 
 def _yaml_key(k: Any) -> str:
@@ -5159,7 +5162,7 @@ def _yaml_key(k: Any) -> str:
     return ks
 
 
-def _yaml_scalar(v: Any, key: Any | None = None) -> str:
+def _yaml_scalar(v: Any, key: Any | None = None, force_string: bool = False) -> str:
     if v is None:
         return "null"
     if isinstance(v, bool):
@@ -5172,6 +5175,11 @@ def _yaml_scalar(v: Any, key: Any | None = None) -> str:
     # 以 ${ 开头的占位符不加引号
     if s.startswith("${") and s.endswith("}"):
         return s
+    # force_string 模式（vars 区域）：所有字符串值强制加引号，
+    # 确保 YAML 反序列化后仍为 str 而非 int/float/bool。
+    # 不论值是 "11111"、"3.14"、"aaa" 还是 "中文测试" 都一律加引号。
+    if force_string:
+        return json.dumps(s, ensure_ascii=False)
     # 多语言文本里的纯数字必须保持字符串，否则 YAML 反序列化会变成 int，
     # 运行时再写回文本字段时会触发 ClassCastException。
     if key in _MULTILANG_KEYS and s and _RX_INTEGER.match(s):
