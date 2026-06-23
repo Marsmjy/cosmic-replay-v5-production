@@ -437,6 +437,17 @@ class CosmicFormReplay:
             source="open_form",
             parent_page_id=str(parent_page_id or ""),
         )
+        # ⭐ 修复：如果 open_form 获得的 pageId 与 _pending_by_app 中的值相同，
+        # 说明该 pending 已被本 open_form 消费（服务端为 addVirtualTab 和
+        # getConfig 返回了相同 pageId），必须清除 pending，否则后续步骤会
+        # 误领这个过期 pending 作为自己的 pageId（导致操作错误的表单窗口）。
+        _pending = getattr(self, "_pending_by_app", {}).get(app_id)
+        if _pending and _pending == page_id:
+            self._pending_by_app.pop(app_id, None)
+            log.debug(
+                "[open_form] cleared stale _pending_by_app[%s]: %s (matched open_form pageId)",
+                app_id, str(page_id)[:20],
+            )
         return page_id
 
     def open_portal(self, form_id: str, app_id: str = "bos",
