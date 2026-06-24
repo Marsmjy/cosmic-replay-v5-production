@@ -4518,24 +4518,29 @@ def _preflight_write_case(
 
 def _collect_batch_companion_actions(
     steps: list[dict],
-) -> tuple[dict[str, list[dict]], set[str]]:
-    """识别同源 HAR 批量 invoke 步骤，返回 (companion_actions_map, merged_step_ids)。
+) -> tuple[dict[str, list[dict]], set[str], dict[str, dict]]:
+    """识别同源 HAR 批量步骤，返回 (companion_actions_map, merged_step_ids, anchor_rewrite_map)。
 
     HAR 录制时一个 HTTP 请求（batchInvokeAction.do）可能包含多个 action
-    （如 entryRowClick + click），提取器拆分为独立 YAML 步骤后，回放时
-    作为独立 invoke 调用会导致服务端丢失 action 间上下文。
+    （如分录多行编辑里 entryRowClick + updateValue 交替），提取器拆分为
+    独立 YAML 步骤后，回放时作为独立 invoke / update_fields 调用会丢失
+    action 间的行光标上下文，导致服务端在分录场景误判“行重复”。
 
-    本函数通过 ir_sources[0].source_index 检测同源步骤，将后续步骤的
-    action 数据收集到首步的 _batch_extra_actions 中，并标记后续步骤
-    的 ID 为已合并，主循环跳过这些步骤。
+    本函数通过 ir_sources[0].source_index 检测同源步骤（同时纳入 invoke 与
+    update_fields），把后续步骤的 action 收集到首步的 _batch_extra_actions，
+    并标记后续步骤 ID 为已合并（主循环跳过）。对 update_fields 步骤按
+    row_index 重建带行光标（selRows）的 updateValue postData，从而原样复刻
+    录制时的原子批量请求。若首步本身为 update_fields，则在 anchor_rewrite
+    中提供改写信息，令主循环将其改写为等价 invoke 步骤执行。
     """
     companion_actions: dict[str, list[dict]] = {}
     merged_ids: set[str] = set()
+    anchor_rewrite: dict[str, dict] = {}
 
-    # 按 source_index 分组 invoke 步骤的索引
+    # 按 source_index 分组 invoke / update_fields 步骤的索引
     groups: dict[int, list[int]] = {}
     for i, s in enumerate(steps):
-        if s.get("type") != "invoke":
+        if s.get("type") not in ("invoke", "update_fields"):
             continue
         ir_sources = s.get("ir_sources") or []
         if not ir_sources or not isinstance(ir_sources, list):
@@ -4548,35 +4553,104 @@ def _collect_batch_companion_actions(
             continue
         groups.setdefault(si, []).append(i)
 
+    def _action_index(idx: int) -> int:
+        irs = steps[idx].get("ir_sources") or []
+        if irs and isinstance(irs[0], dict):
+            ai = irs[0].get("action_index")
+            if isinstance(ai, int):
+                return ai
+        return 0
+
+    def _step_id(idx: int) -> str:
+        return steps[idx].get("id") or f"<step_{idx}>"
+
+    def _entry_key_of(idx: int) -> str:
+        s = steps[idx]
+        key = s.get("key") or ""
+        if key:
+            return key
+        pd = s.get("post_data") or []
+        if pd and isinstance(pd[0], dict) and pd[0]:
+            return next(iter(pd[0].keys()), "")
+        return ""
+
+    def _build_action(idx: int, entry_key: str) -> dict:
+        s = steps[idx]
+        if s.get("type") == "invoke":
+            return {
+                "key": s.get("key", ""),
+                "methodName": s.get("method", ""),
+                "args": s.get("args", []),
+                "postData": s.get("post_data", [{}, []]),
+            }
+        # update_fields → 重建带行光标的 updateValue，复刻录制时的分录行上下文
+        fields = s.get("fields") or {}
+        row = s.get("row_index", -1)
+        field_key = next(iter(fields.keys()), "") if fields else ""
+        cursor: dict = {}
+        if entry_key and isinstance(row, int) and row >= 0:
+            cursor = {entry_key: {
+                "fieldKey": field_key,
+                "row": row,
+                "selRows": [row],
+                "selDatas": [],
+                "isClientNewRow": False,
+                "clientNewRows": "",
+            }}
+        items = [{"k": k, "v": v, "r": row} for k, v in fields.items()]
+        return {
+            "key": "",
+            "methodName": "updateValue",
+            "args": [],
+            "postData": [cursor, items],
+        }
+
     for si, indices in groups.items():
         if len(indices) < 2:
             continue
+        # 按 action_index 还原录制内的真实顺序
+        indices = sorted(indices, key=_action_index)
         first_idx = indices[0]
-        first_step = steps[first_idx]
-        first_form = first_step.get("form_id", "")
-        first_app = first_step.get("app_id", "")
-        first_sid = first_step.get("id") or f"<invoke_{first_idx}>"
+        first_form = steps[first_idx].get("form_id", "")
+        first_app = steps[first_idx].get("app_id", "")
 
-        companion_list: list[dict] = []
+        # 仅纳入同 form/app 的连续同源步骤（遇异形即止）
+        ordered = [first_idx]
         for j in indices[1:]:
-            companion = steps[j]
-            # 必须同 form_id 和 app_id 才能合并到同一批量调用
-            if companion.get("form_id", "") != first_form:
+            if steps[j].get("form_id", "") != first_form:
                 break
-            if companion.get("app_id", "") != first_app:
+            if steps[j].get("app_id", "") != first_app:
                 break
-            companion_list.append({
-                "key": companion.get("key", ""),
-                "methodName": companion.get("method", ""),
-                "args": companion.get("args", []),
-                "postData": companion.get("post_data", [{}, []]),
-            })
-            merged_ids.add(companion.get("id") or f"<invoke_{j}>")
+            ordered.append(j)
+        if len(ordered) < 2:
+            continue
 
-        if companion_list:
-            companion_actions[first_sid] = companion_list
+        # 分录行光标 key（来自组内 entryRowClick 步骤）
+        entry_key = ""
+        for j in ordered:
+            if steps[j].get("method") == "entryRowClick" or steps[j].get("ac") == "entryRowClick":
+                entry_key = _entry_key_of(j)
+                if entry_key:
+                    break
 
-    return companion_actions, merged_ids
+        actions = [_build_action(j, entry_key) for j in ordered]
+        anchor_sid = _step_id(first_idx)
+        companion_actions[anchor_sid] = actions[1:]
+        for j in ordered[1:]:
+            merged_ids.add(_step_id(j))
+
+        # 首步若为 update_fields，提供改写为等价 invoke 的信息
+        if steps[first_idx].get("type") == "update_fields":
+            main = actions[0]
+            anchor_rewrite[anchor_sid] = {
+                "ac": "updateValue",
+                "key": main["key"],
+                "method": main["methodName"],
+                "args": main["args"],
+                "post_data": main["postData"],
+            }
+
+    return companion_actions, merged_ids, anchor_rewrite
 
 
 def run_case(case: dict, on_event=None) -> RunResult:
@@ -4872,9 +4946,15 @@ def run_case(case: dict, on_event=None) -> RunResult:
     steps_to_run = [] if preflight_blocked else (case.get("steps") or [])
 
     # ⭐ 批量 invoke 合并：检测同源 HAR 步骤，将 companion action 挂载到首步，其余标记跳过
-    _batch_companions, _merged_batch_step_ids = _collect_batch_companion_actions(steps_to_run)
+    _batch_companions, _merged_batch_step_ids, _batch_anchor_rewrite = _collect_batch_companion_actions(steps_to_run)
 
     for _step_idx, raw_step in enumerate(steps_to_run):
+        # ⭐ 批量首步改写：若同源批量的首步为 update_fields，改写为等价 invoke，
+        # 使其走批量 invoke 路径并携带重建后的行光标 postData。
+        _raw_sid = raw_step.get("id")
+        if _raw_sid and _raw_sid in _batch_anchor_rewrite:
+            raw_step = {**raw_step, **_batch_anchor_rewrite[_raw_sid], "type": "invoke"}
+            raw_step.pop("expected_request_signature", None)
         step = resolve_vars(raw_step, vars_ns)
         preparation_errors: list[str] = []
 
@@ -4931,9 +5011,9 @@ def run_case(case: dict, on_event=None) -> RunResult:
             })
             continue
 
-        # ⭐ 批量 invoke 合并：为首步注入 companion actions
+        # ⭐ 批量 invoke 合并：为首步注入 companion actions（含 ${vars} 模板，需解析）
         if stype == "invoke" and sid in _batch_companions:
-            step["_batch_extra_actions"] = _batch_companions[sid]
+            step["_batch_extra_actions"] = resolve_vars(_batch_companions[sid], vars_ns)
         if stype == "invoke" and step.get("_selector_env_field_meta"):
             _resolve_selector_row_from_recent_grid(step, ctx)
         if stype in ("invoke", "wait_until"):

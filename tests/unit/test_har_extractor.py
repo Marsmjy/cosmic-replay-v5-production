@@ -351,5 +351,43 @@ class TestEdgeCases:
         assert result is None
 
 
+class TestVarCollapseGuard:
+    """防塌缩守卫：同一 key 在分录多行出现不同值时，不得塌缩成单一变量。
+
+    回归背景：业务模型「全字段类型人员附表」分录每行 fieldtype 是不同枚举
+    （TextField/AssistantField/I18nNameField...）。兜底变量化曾对同 key 所有行
+    复用同名变量 test_fieldtype，把所有行塌缩成首行值 TextField，导致回放时
+    按行打开的弹窗（如辅助资料选择器）拿到错误 pageId，最终 select assitant
+    group 加载失败。
+    """
+
+    def test_same_key_different_values_not_collapsed(self):
+        actions = [
+            {"type": "update_fields", "form_id": "hrbm_field",
+             "fields": {"fieldtype": "TextField"}},
+            {"type": "update_fields", "form_id": "hrbm_field",
+             "fields": {"fieldtype": "AssistantField"}},
+            {"type": "update_fields", "form_id": "hrbm_field",
+             "fields": {"fieldtype": "I18nNameField"}},
+        ]
+        new_seq, _vars, _labels = detect_var_placeholders(actions)
+        vals = [a["fields"]["fieldtype"] for a in new_seq]
+        # 后两个不同枚举值必须保留字面量，不能被塌缩成首行的变量引用
+        assert vals[1] == "AssistantField", vals
+        assert vals[2] == "I18nNameField", vals
+
+    def test_same_key_same_value_can_reuse_var(self):
+        actions = [
+            {"type": "update_fields", "form_id": "hrbm_field",
+             "fields": {"remark": "hello"}},
+            {"type": "update_fields", "form_id": "hrbm_field",
+             "fields": {"remark": "hello"}},
+        ]
+        new_seq, _vars, _labels = detect_var_placeholders(actions)
+        vals = [a["fields"]["remark"] for a in new_seq]
+        # 相同值仍可复用同一变量引用（不受守卫影响）
+        assert vals[0] == vals[1]
+
+
 # 运行测试命令：
 # cd cosmic-replay-v4 && python -m pytest tests/unit/test_har_extractor.py -v

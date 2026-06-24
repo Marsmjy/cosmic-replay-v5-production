@@ -35,6 +35,7 @@ from lib.runner import (
     _resolve_dynamic_query_entry_row,
     _apply_target_data_selector,
     _is_cross_environment_run,
+    _collect_batch_companion_actions,
 )
 from lib.request_signature import build_request_signature, evaluate_request_contract
 from lib.replay import CosmicFormReplay, CosmicSession, ProtocolError, has_error_action
@@ -4021,6 +4022,128 @@ class TestHelperFunctions:
         vars_dict = {"name": "test"}
         result = _resolve_ref(" vars.name ", vars_dict)
         assert result == "test"
+
+
+class TestBatchCompanionActions:
+    """_collect_batch_companion_actions 同源批量合并（comboitem 分录多行场景）"""
+
+    def _combo_value_steps(self):
+        """复刻 HAR entry[228] 的 4 动作批量：
+        action0 updateValue row0=1 / action1 entryRowClick row1 /
+        action2 updateValue row1=2 / action3 entryRowClick row2
+        提取器拆分后：fill_value(update_fields) / updateValue_237(invoke) /
+        fill_value_2(update_fields) / updateValue_239(invoke)，同 source_index=228。
+        """
+        return [
+            {
+                "id": "fill_value",
+                "type": "update_fields",
+                "form_id": "hrbm_comboitem_page",
+                "app_id": "hrbm",
+                "fields": {"value": "1"},
+                "row_index": 0,
+                "ir_sources": [{"source_index": 228, "action_index": 0}],
+            },
+            {
+                "id": "updateValue_237",
+                "type": "invoke",
+                "ac": "updateValue",
+                "form_id": "hrbm_comboitem_page",
+                "app_id": "hrbm",
+                "key": "entryentity",
+                "method": "entryRowClick",
+                "args": [1],
+                "post_data": [
+                    {"entryentity": {"fieldKey": "value", "row": 1, "selRows": [1]}},
+                    [],
+                ],
+                "ir_sources": [{"source_index": 228, "action_index": 1}],
+            },
+            {
+                "id": "fill_value_2",
+                "type": "update_fields",
+                "form_id": "hrbm_comboitem_page",
+                "app_id": "hrbm",
+                "fields": {"value": "2"},
+                "row_index": 1,
+                "ir_sources": [{"source_index": 228, "action_index": 2}],
+            },
+            {
+                "id": "updateValue_239",
+                "type": "invoke",
+                "ac": "updateValue",
+                "form_id": "hrbm_comboitem_page",
+                "app_id": "hrbm",
+                "key": "entryentity",
+                "method": "entryRowClick",
+                "args": [2],
+                "post_data": [
+                    {"entryentity": {"fieldKey": "value", "row": 2, "selRows": [2]}},
+                    [],
+                ],
+                "ir_sources": [{"source_index": 228, "action_index": 3}],
+            },
+        ]
+
+    def test_merges_same_source_into_single_batch(self):
+        steps = self._combo_value_steps()
+        companions, merged_ids, anchor_rewrite = _collect_batch_companion_actions(steps)
+
+        # 首步 fill_value 为锚点，其余 3 个步骤被合并
+        assert "fill_value" in companions
+        assert merged_ids == {"updateValue_237", "fill_value_2", "updateValue_239"}
+        # 首步是 update_fields，需要锚点改写
+        assert "fill_value" in anchor_rewrite
+
+    def test_action_sequence_matches_har_entry(self):
+        steps = self._combo_value_steps()
+        companions, _merged, anchor_rewrite = _collect_batch_companion_actions(steps)
+
+        # 锚点（action0）：update_fields → updateValue row0=1，带行光标
+        anchor = anchor_rewrite["fill_value"]
+        assert anchor["method"] == "updateValue"
+        cursor0, items0 = anchor["post_data"]
+        assert cursor0 == {"entryentity": {
+            "fieldKey": "value", "row": 0, "selRows": [0],
+            "selDatas": [], "isClientNewRow": False, "clientNewRows": "",
+        }}
+        assert items0 == [{"k": "value", "v": "1", "r": 0}]
+
+        # companion 序列（action1/2/3）顺序与 HAR 一致
+        comp = companions["fill_value"]
+        assert len(comp) == 3
+        # action1 entryRowClick row1
+        assert comp[0]["methodName"] == "entryRowClick"
+        assert comp[0]["args"] == [1]
+        # action2 updateValue row1=2，重建行光标 selRows=[1]
+        assert comp[1]["methodName"] == "updateValue"
+        cursor2, items2 = comp[1]["postData"]
+        assert cursor2["entryentity"]["row"] == 1
+        assert cursor2["entryentity"]["selRows"] == [1]
+        assert items2 == [{"k": "value", "v": "2", "r": 1}]
+        # action3 entryRowClick row2
+        assert comp[2]["methodName"] == "entryRowClick"
+        assert comp[2]["args"] == [2]
+
+    def test_single_source_step_not_merged(self):
+        """同源仅一个步骤时不应触发合并"""
+        steps = [self._combo_value_steps()[0]]
+        companions, merged_ids, anchor_rewrite = _collect_batch_companion_actions(steps)
+        assert companions == {}
+        assert merged_ids == set()
+        assert anchor_rewrite == {}
+
+    def test_different_source_index_not_merged(self):
+        """落单（source_index 唯一）的步骤不应被合并"""
+        steps = self._combo_value_steps()
+        # 末步改为独立 source_index，使其落单
+        steps[3]["ir_sources"] = [{"source_index": 999, "action_index": 0}]
+        companions, merged_ids, _anchor = _collect_batch_companion_actions(steps)
+        # 228 组合并 fill_value(锚) + updateValue_237 + fill_value_2；999 组落单不合并
+        assert merged_ids == {"updateValue_237", "fill_value_2"}
+        assert "updateValue_239" not in merged_ids
+        assert "fill_value" in companions
+        assert len(companions["fill_value"]) == 2
 
 
 # 运行测试命令：

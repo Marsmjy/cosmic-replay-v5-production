@@ -2413,6 +2413,14 @@ def detect_var_placeholders(actions_seq: list[dict], meta_resolver=None) -> tupl
             except Exception:
                 pass
         vname = _text_var_name(key_hint)
+        # ⭐ 防塌缩守卫：同一 key 在分录多行/多处出现不同值时（如分录 fieldtype
+        # 逐行的 TextField/AssistantField/I18nNameField 枚举值），_text_var_name
+        # 会为所有行生成同名变量。若直接复用首个值的变量，会把每行不同的结构化
+        # 枚举值塌缩成同一个值，回放时所有行被写成首行值，导致后续按行打开的弹窗
+        # 表单（如辅助资料/选择器）拿到错误 pageId。此类逐行不同的值不是用户自由
+        # 文本，应保留字面量，不做兜底变量化。
+        if vname in vars_map and str(vars_map.get(vname)) != str(val):
+            return val
         if vname not in vars_map:
             vars_map[vname] = val
             label = _resolve_field_label(key_hint, entity_id=current_form_id, meta_resolver=meta_resolver)
