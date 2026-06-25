@@ -17,13 +17,14 @@
       "pick_lawentity_id|lookup|getLookUpList|value_code|exactly_one|lookup|number|name|id|version"
     ],
     "field_catalog": {
-      "count": 5,
+      "count": 6,
       "signatures": [
         "1|field_hbss_enterprise_form_createorg|basedata|pick_fields||pick_createorg_id",
         "2|field_hbss_enterprise_form_number|text|vars|test_number|",
         "3|field_hbss_enterprise_form_name|multi_lang_text|vars|test_name|",
         "4|field_hbss_enterprise_entry_lawentity|basedata|pick_fields||pick_lawentity_id",
-        "5|control_hbss_enterprise_form_btnsave_click_click|button|structural||"
+        "5|field_hbss_enterprise_form_description|multi_lang_text|vars|test_description|",
+        "6|control_hbss_enterprise_form_btnsave_click_click|button|structural||"
       ]
     },
     "generation_gate": {
@@ -37,9 +38,9 @@
     "pageid_source_graph": {
       "summary": {
         "l2_consumer_count": 4,
-        "l3_consumer_count": 6,
-        "node_count": 12,
-        "recorded_source_retained_count": 8,
+        "l3_consumer_count": 7,
+        "node_count": 13,
+        "recorded_source_retained_count": 9,
         "safe_recovery_count": 0,
         "unsafe_consumer_count": 0
       },
@@ -192,6 +193,24 @@
           "step_type": "pick_basedata"
         },
         {
+          "ac": "",
+          "app_id": "hbss",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hbss_enterprise",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_tblnew",
+          "risk_codes": [],
+          "step_id": "fill_description",
+          "step_type": "update_fields"
+        },
+        {
           "ac": "click",
           "app_id": "hbss",
           "expected_pageid_role": "L3",
@@ -222,7 +241,7 @@
           "recorded_pageid_source_form_match": null,
           "recorded_pageid_source_kind": "responsePageId",
           "recorded_pageid_source_retained": true,
-          "recorded_pageid_source_step_id": "click_9",
+          "recorded_pageid_source_step_id": "fill_description",
           "risk_codes": [],
           "step_id": "commonSearch_11",
           "step_type": "invoke"
@@ -232,12 +251,12 @@
         "expected_roles": {
           "L2": 4,
           "L2_or_L3": 2,
-          "L3": 6
+          "L3": 7
         },
         "preserve_l2_steps": 0,
         "risk_counts": {},
         "risk_level": "none",
-        "total_steps": 12
+        "total_steps": 13
       }
     },
     "pick_fields": [
@@ -284,7 +303,22 @@
     "scenario_stages": [
       "save"
     ],
-    "step_count": 12,
+    "step_count": 13,
+    "step_order": [
+      "click_tblrefresh|invoke|hbss_basedatalist",
+      "entryRowClick_2|invoke|hbss_basedatalist",
+      "entryRowClick_3|invoke|hbss_basedatalist",
+      "load_enterprise|invoke|hbss_enterprise",
+      "selectTab_5|invoke|hbss_appgridhome",
+      "click_tblnew|invoke|hbss_enterprise",
+      "load_enterprise_2|invoke|hbss_enterprise",
+      "fill_createorg_ctx|update_fields|hbss_enterprise",
+      "fill_number|update_fields|hbss_enterprise",
+      "pick_lawentity|pick_basedata|hbss_enterprise",
+      "fill_description|update_fields|hbss_enterprise",
+      "click_9|invoke|hbss_enterprise",
+      "commonSearch_11|invoke|hbss_enterprise"
+    ],
     "steps": [
       {
         "ac": "refresh",
@@ -435,6 +469,31 @@
         }
       },
       {
+        "app_id": "hbss",
+        "fields": [
+          {
+            "field_key": "description",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          }
+        ],
+        "form_id": "hbss_enterprise",
+        "id": "fill_description",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
         "ac": "click",
         "app_id": "hbss",
         "args_count": 0,
@@ -510,11 +569,11 @@
   },
   "preview": {
     "components": {
-      "coverage_percent": 88,
+      "coverage_percent": 89,
       "handler_ids": [
         "list_navigation",
-        "form_load",
         "field_update",
+        "form_load",
         "generic_safe_invoke",
         "portal_navigation",
         "create_record",
@@ -523,8 +582,8 @@
       ],
       "partial_steps": 3,
       "risk_level": "medium",
-      "supported_steps": 10,
-      "total_steps": 13,
+      "supported_steps": 11,
+      "total_steps": 14,
       "unsupported_steps": 0
     },
     "detected_vars": [
@@ -533,12 +592,13 @@
       "test_number"
     ],
     "field_catalog": {
-      "count": 5,
+      "count": 6,
       "field_ids": [
         "field_hbss_enterprise_form_createorg",
         "field_hbss_enterprise_form_number",
         "field_hbss_enterprise_form_name",
         "field_hbss_enterprise_entry_lawentity",
+        "field_hbss_enterprise_form_description",
         "control_hbss_enterprise_form_btnsave_click_click"
       ],
       "unknown_count": 0
@@ -562,7 +622,7 @@
     "maintainability": {
       "auto_resolve_pick_count": 1,
       "business_flow_count": 3,
-      "business_flow_step_count": 13,
+      "business_flow_step_count": 14,
       "detected_var_count": 3,
       "high_env_sensitive_count": 0,
       "ir_interaction_bridge_status": "ready_with_warnings",
@@ -609,8 +669,8 @@
   },
   "sample_id": "06_enterprise",
   "schema_version": 2,
-  "source_har": "preview_1778835335_基础资料-用人单位.har",
+  "source_har": "preview_1782281198_基础资料-用人单位.har",
   "source_sha256": "80b61e12486c83f9549d32b33ae9a14c1c4483d842aeca75064c7f12e7fe15d8",
-  "summary_hash": "f76df578f74185d1abb8301612ae680a674fdf0c310aa20773a08e6fd3a1c403",
+  "summary_hash": "3c46c1ddd58d92d46e64195c0879e541c0fc621b66f63d1f580f0ff355ef43ac",
   "title": "基础资料-用人单位"
 }

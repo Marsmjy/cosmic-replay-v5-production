@@ -95,6 +95,15 @@ def summarize_case(case: dict[str, Any], har_steps: list[dict[str, Any]] | None 
         "scenario_kind": ((case.get("scenario") or {}).get("kind") or ""),
         "scenario_stages": list((case.get("scenario") or {}).get("stages") or []),
         "step_count": len(steps),
+        "step_order": [
+            "|".join([
+                str(step.get("id") or ""),
+                str(step.get("type") or ""),
+                str(step.get("form_id") or ""),
+            ])
+            for step in steps
+            if isinstance(step, dict)
+        ],
         "assertion_count": len(assertions),
         "target_forms": sorted(case.get("target_forms") or []),
         "vars": [
@@ -451,6 +460,8 @@ def compare_snapshots(baseline: dict[str, Any], current: dict[str, Any]) -> dict
 def classify_diff_severity(diff: dict[str, Any]) -> str:
     path = diff.get("path", "")
     if path.startswith("case.main_form_id"):
+        return "breaking"
+    if path.startswith("case.step_order"):
         return "breaking"
     if path.startswith("case.steps"):
         return "breaking"

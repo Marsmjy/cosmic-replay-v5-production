@@ -30,7 +30,7 @@
       "pick_diplomareq_id|lookup|getLookUpList||exactly_one|lookup|number|name|id|version"
     ],
     "field_catalog": {
-      "count": 18,
+      "count": 23,
       "signatures": [
         "1|field_hbpm_positionhr_form_adminorg|basedata|pick_fields||pick_adminorg_id",
         "2|field_hbpm_positionhr_entry_changedesc|basedata|pick_fields||pick_changedesc_id",
@@ -45,11 +45,16 @@
         "11|field_hbpm_positionhr_entry_job|basedata|pick_fields||pick_job_id",
         "12|field_hbpm_positionhr_entry_jobgradescm|basedata|pick_fields||pick_jobgradescm_id",
         "13|field_hbpm_positionhr_entry_joblevelscm|basedata|pick_fields||pick_joblevelscm_id",
-        "14|field_hbpm_positionhr_form_posorientation|multi_lang_text|vars||",
-        "15|field_hbpm_positionhr_form_posduty|multi_lang_text|vars||",
-        "16|field_hbpm_positionhr_form_posstandard|multi_lang_text|vars||",
+        "14|field_hbpm_positionhr_form_posorientation|multi_lang_text|vars|test_posorientation|",
+        "15|field_hbpm_positionhr_form_posduty|multi_lang_text|vars|test_posduty|",
+        "16|field_hbpm_positionhr_form_posstandard|multi_lang_text|vars|test_posstandard|",
         "17|field_hbpm_positionhr_entry_diplomareq|basedata|pick_fields||pick_diplomareq_id",
-        "18|control_hbpm_positionhr_form_tbmain_save_itemclick|button|structural||"
+        "18|field_hbpm_positionhr_form_agereq|multi_lang_text|vars|test_agereq|",
+        "19|field_hbpm_positionhr_form_knowledgereq|multi_lang_text|vars|test_knowledgereq|",
+        "20|field_hbpm_positionhr_form_skillreq|multi_lang_text|vars|test_skillreq|",
+        "21|field_hbpm_positionhr_form_abilityreq|multi_lang_text|vars|test_abilityreq|",
+        "22|field_hbpm_positionhr_form_experiencereq|multi_lang_text|vars|test_experiencereq|",
+        "23|control_hbpm_positionhr_form_tbmain_save_itemclick|button|structural||"
       ]
     },
     "generation_gate": {
@@ -63,9 +68,9 @@
     "pageid_source_graph": {
       "summary": {
         "l2_consumer_count": 4,
-        "l3_consumer_count": 21,
-        "node_count": 27,
-        "recorded_source_retained_count": 22,
+        "l3_consumer_count": 22,
+        "node_count": 28,
+        "recorded_source_retained_count": 23,
         "safe_recovery_count": 2,
         "unsafe_consumer_count": 0
       },
@@ -452,6 +457,24 @@
           "step_type": "pick_basedata"
         },
         {
+          "ac": "",
+          "app_id": "hbpm",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "hbpm_positionhr",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "close",
+          "risk_codes": [],
+          "step_id": "fill_agereq_etc",
+          "step_type": "update_fields"
+        },
+        {
           "ac": "save",
           "app_id": "hbpm",
           "expected_pageid_role": "L3",
@@ -528,12 +551,12 @@
         "expected_roles": {
           "L2": 4,
           "L2_or_L3": 2,
-          "L3": 21
+          "L3": 22
         },
         "preserve_l2_steps": 3,
         "risk_counts": {},
         "risk_level": "none",
-        "total_steps": 27
+        "total_steps": 28
       }
     },
     "pick_fields": [
@@ -821,7 +844,37 @@
     "scenario_stages": [
       "save"
     ],
-    "step_count": 27,
+    "step_count": 28,
+    "step_order": [
+      "open_positionhr|open_form|hbpm_positionhr",
+      "load_positionhr|invoke|hbpm_positionhr",
+      "selectTab_3|invoke|homs_apphome",
+      "click_tblnew|invoke|hbpm_positionhr",
+      "load_positionhr_2|invoke|hbpm_positionhr",
+      "pick_adminorg_ctx|pick_basedata|hbpm_positionhr",
+      "selectTab_7|invoke|homs_apphome",
+      "pick_changedesc|pick_basedata|hbpm_positionhr",
+      "changeYear_9|invoke|hbpm_positionhr",
+      "fill_bsed_etc|update_fields|hbpm_positionhr",
+      "pick_positiontype|pick_basedata|hbpm_positionhr",
+      "pick_countryregion|pick_basedata|hbpm_positionhr",
+      "pick_city|pick_basedata|hbpm_positionhr",
+      "pick_workplace|pick_basedata|hbpm_positionhr",
+      "fill_description|update_fields|hbpm_positionhr",
+      "pick_job|pick_basedata|hbpm_positionhr",
+      "pick_jobgradescm|pick_basedata|hbpm_positionhr",
+      "click_19|invoke|hbpm_positionhr",
+      "load_jobgraderange|invoke|hbjm_jobgraderange",
+      "close|invoke|hbjm_jobgraderange",
+      "pick_joblevelscm|pick_basedata|hbpm_positionhr",
+      "fill_posorientation|update_fields|hbpm_positionhr",
+      "pick_diplomareq|pick_basedata|hbpm_positionhr",
+      "fill_agereq_etc|update_fields|hbpm_positionhr",
+      "click_bar_save|invoke|hbpm_positionhr",
+      "click_bar_close|invoke|hbpm_positionhr",
+      "selectTab_27|invoke|homs_apphome",
+      "commonSearch_29|invoke|hbpm_positionhr"
+    ],
     "steps": [
       {
         "app_id": "hbpm",
@@ -1143,8 +1196,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 5
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           },
@@ -1157,8 +1212,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 5
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           },
@@ -1171,8 +1228,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 4
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -1197,6 +1256,95 @@
         }
       },
       {
+        "app_id": "hbpm",
+        "fields": [
+          {
+            "field_key": "abilityreq",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          },
+          {
+            "field_key": "agereq",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          },
+          {
+            "field_key": "experiencereq",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          },
+          {
+            "field_key": "knowledgereq",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          },
+          {
+            "field_key": "skillreq",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          }
+        ],
+        "form_id": "hbpm_positionhr",
+        "id": "fill_agereq_etc",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
         "ac": "save",
         "app_id": "hbpm",
         "args_count": 2,
@@ -1215,8 +1363,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 5
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           },
@@ -1229,8 +1379,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 2
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           },
@@ -1243,8 +1395,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 5
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           },
@@ -1257,8 +1411,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 5
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           },
@@ -1271,8 +1427,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 5
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -1319,11 +1477,43 @@
     "target_forms": [],
     "vars": [
       {
+        "label": "能力要求",
+        "name": "test_abilityreq",
+        "value_shape": {
+          "kind": "literal",
+          "length": 5
+        }
+      },
+      {
+        "label": "年龄要求",
+        "name": "test_agereq",
+        "value_shape": {
+          "kind": "literal",
+          "length": 2
+        }
+      },
+      {
         "label": "备注",
         "name": "test_description",
         "value_shape": {
           "kind": "literal",
           "length": 7
+        }
+      },
+      {
+        "label": "经验要求",
+        "name": "test_experiencereq",
+        "value_shape": {
+          "kind": "literal",
+          "length": 5
+        }
+      },
+      {
+        "label": "知识要求",
+        "name": "test_knowledgereq",
+        "value_shape": {
+          "kind": "literal",
+          "length": 5
         }
       },
       {
@@ -1345,18 +1535,50 @@
             "${rand:*}"
           ]
         }
+      },
+      {
+        "label": "岗位职责",
+        "name": "test_posduty",
+        "value_shape": {
+          "kind": "literal",
+          "length": 5
+        }
+      },
+      {
+        "label": "岗位定位",
+        "name": "test_posorientation",
+        "value_shape": {
+          "kind": "literal",
+          "length": 5
+        }
+      },
+      {
+        "label": "岗位衡量标准",
+        "name": "test_posstandard",
+        "value_shape": {
+          "kind": "literal",
+          "length": 4
+        }
+      },
+      {
+        "label": "技能要求",
+        "name": "test_skillreq",
+        "value_shape": {
+          "kind": "literal",
+          "length": 5
+        }
       }
     ]
   },
   "preview": {
     "components": {
-      "coverage_percent": 83,
+      "coverage_percent": 84,
       "handler_ids": [
         "basedata_selector",
         "generic_safe_invoke",
+        "field_update",
         "form_load",
         "portal_navigation",
-        "field_update",
         "tree_navigation",
         "dialog_confirm",
         "tree_context",
@@ -1366,17 +1588,25 @@
       ],
       "partial_steps": 10,
       "risk_level": "medium",
-      "supported_steps": 20,
-      "total_steps": 30,
+      "supported_steps": 21,
+      "total_steps": 31,
       "unsupported_steps": 0
     },
     "detected_vars": [
+      "test_abilityreq",
+      "test_agereq",
       "test_description",
+      "test_experiencereq",
+      "test_knowledgereq",
       "test_name",
-      "test_number"
+      "test_number",
+      "test_posduty",
+      "test_posorientation",
+      "test_posstandard",
+      "test_skillreq"
     ],
     "field_catalog": {
-      "count": 18,
+      "count": 23,
       "field_ids": [
         "field_hbpm_positionhr_form_adminorg",
         "field_hbpm_positionhr_entry_changedesc",
@@ -1395,6 +1625,11 @@
         "field_hbpm_positionhr_form_posduty",
         "field_hbpm_positionhr_form_posstandard",
         "field_hbpm_positionhr_entry_diplomareq",
+        "field_hbpm_positionhr_form_agereq",
+        "field_hbpm_positionhr_form_knowledgereq",
+        "field_hbpm_positionhr_form_skillreq",
+        "field_hbpm_positionhr_form_abilityreq",
+        "field_hbpm_positionhr_form_experiencereq",
         "control_hbpm_positionhr_form_tbmain_save_itemclick"
       ],
       "unknown_count": 0
@@ -1416,8 +1651,8 @@
     "maintainability": {
       "auto_resolve_pick_count": 12,
       "business_flow_count": 3,
-      "business_flow_step_count": 30,
-      "detected_var_count": 3,
+      "business_flow_step_count": 31,
+      "detected_var_count": 11,
       "high_env_sensitive_count": 5,
       "ir_interaction_bridge_status": "ready_with_warnings",
       "ir_interaction_count": 20,
@@ -1480,8 +1715,8 @@
   },
   "sample_id": "08_position",
   "schema_version": 2,
-  "source_har": "preview_1778835351_岗位信息维护-新增一个岗位.har",
+  "source_har": "preview_1782281186_岗位信息维护-新增一个岗位.har",
   "source_sha256": "41d1ce3fb7525775375ebb7c0f89e873c9195345fcbf51e415ecb203f3078de0",
-  "summary_hash": "f5e34a66cf72b0ffb14ec94a5a1622eb857ef1591be64c9b7a28b2fe7b19a44c",
+  "summary_hash": "6a043c4ef9f1e0264a0b38cf7f1020397598cc471b25cd57e1458ace3c38250a",
   "title": "岗位信息维护-新增一个岗位"
 }

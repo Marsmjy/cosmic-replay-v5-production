@@ -1,0 +1,542 @@
+{
+  "business_type": "HR 基础资料 · 写锚点独立性",
+  "case": {
+    "assertion_count": 2,
+    "assertions": [
+      {
+        "step": "click_6",
+        "type": "no_save_failure"
+      },
+      {
+        "step": "click_6",
+        "type": "no_error_actions"
+      }
+    ],
+    "environment_resolvers": [
+      "pick_createorg_id|lookup|getLookUpList||exactly_one|lookup|number|name|id|version",
+      "pick_ctrlstrategy_id|lookup|getLookUpList||exactly_one|lookup|number|name|id|version"
+    ],
+    "field_catalog": {
+      "count": 5,
+      "signatures": [
+        "1|field_haos_orgchangereason_form_createorg|basedata|pick_fields||pick_createorg_id",
+        "2|field_haos_orgchangereason_form_ctrlstrategy|combo|pick_fields||pick_ctrlstrategy_id",
+        "3|field_haos_orgchangereason_form_number|text|vars|test_number|",
+        "4|field_haos_orgchangereason_form_name|multi_lang_text|vars||",
+        "5|control_haos_orgchangereason_form_btnsave_click_click|button|structural||"
+      ]
+    },
+    "generation_gate": {
+      "allow_generate": true,
+      "allow_run": true,
+      "blocker_codes": [],
+      "decision": "ready"
+    },
+    "main_form_id": "haos_orgchangereason",
+    "name": "regression_09_change_reason_bbb",
+    "pageid_source_graph": {
+      "summary": {
+        "l2_consumer_count": 3,
+        "l3_consumer_count": 5,
+        "node_count": 9,
+        "recorded_source_retained_count": 4,
+        "safe_recovery_count": 2,
+        "unsafe_consumer_count": 0
+      },
+      "unsafe_consumer_step_ids": []
+    },
+    "pageid_trace": {
+      "steps": [
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_orgchangereason",
+          "har_pageid_type": "missing",
+          "method": "",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "open_orgchangereason",
+          "step_type": "open_form"
+        },
+        {
+          "ac": "loadData",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_orgchangereason",
+          "har_pageid_type": "L1_or_L3",
+          "method": "loadData",
+          "pageid_recovery_strategy": "recorded_l2_context",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": false,
+          "recorded_pageid_source_step_id": "treeMenuClick_1",
+          "risk_codes": [],
+          "step_id": "load_orgchangereason",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "selectTab",
+          "app_id": "homs",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "homs_apphome",
+          "har_pageid_type": "compound_root",
+          "method": "selectTab",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "selectTab_3",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "new",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_orgchangereason",
+          "har_pageid_type": "L2",
+          "method": "itemClick",
+          "pageid_recovery_strategy": "recorded_l2_context",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": false,
+          "recorded_pageid_source_step_id": "treeMenuClick_1",
+          "risk_codes": [],
+          "step_id": "click_tblnew",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_orgchangereason",
+          "har_pageid_type": "missing",
+          "method": "",
+          "pageid_recovery_strategy": "",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "",
+          "recorded_pageid_source_retained": null,
+          "recorded_pageid_source_step_id": "",
+          "risk_codes": [],
+          "step_id": "fill_haos_orgchangereason_recorded_defaults",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_orgchangereason",
+          "har_pageid_type": "L1_or_L3",
+          "method": "",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_tblnew",
+          "risk_codes": [],
+          "step_id": "fill_number_etc",
+          "step_type": "update_fields"
+        },
+        {
+          "ac": "click",
+          "app_id": "haos",
+          "expected_pageid_role": "L3",
+          "force_pageid_validation": false,
+          "form_id": "haos_orgchangereason",
+          "har_pageid_type": "L1_or_L3",
+          "method": "click",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": false,
+          "recorded_pageid_source_form_match": true,
+          "recorded_pageid_source_kind": "showForm",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "click_tblnew",
+          "risk_codes": [],
+          "step_id": "click_6",
+          "step_type": "invoke"
+        },
+        {
+          "ac": "commonSearch",
+          "app_id": "haos",
+          "expected_pageid_role": "L2",
+          "force_pageid_validation": false,
+          "form_id": "haos_orgchangereason",
+          "har_pageid_type": "L2",
+          "method": "commonSearch",
+          "pageid_recovery_strategy": "recorded_source",
+          "preserve_l2_page": true,
+          "recorded_pageid_source_form_match": null,
+          "recorded_pageid_source_kind": "responsePageId",
+          "recorded_pageid_source_retained": true,
+          "recorded_pageid_source_step_id": "fill_number_etc",
+          "risk_codes": [],
+          "step_id": "commonSearch_8",
+          "step_type": "invoke"
+        }
+      ],
+      "summary": {
+        "expected_roles": {
+          "L2": 3,
+          "L2_or_L3": 1,
+          "L3": 5
+        },
+        "preserve_l2_steps": 3,
+        "risk_counts": {},
+        "risk_level": "none",
+        "total_steps": 9
+      }
+    },
+    "pick_fields": [
+      {
+        "app_id": "haos",
+        "auto_resolve": false,
+        "env_sensitive": "medium",
+        "field_key": "createorg",
+        "form_id": "haos_orgchangereason",
+        "label": "创建组织",
+        "name": "pick_createorg_id",
+        "resolve_by": "",
+        "resolve_status": "context",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 6
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 10
+        }
+      },
+      {
+        "app_id": "haos",
+        "auto_resolve": false,
+        "env_sensitive": "low",
+        "field_key": "ctrlstrategy",
+        "form_id": "haos_orgchangereason",
+        "label": "控制策略",
+        "name": "pick_ctrlstrategy_id",
+        "resolve_by": "",
+        "resolve_status": "context",
+        "value_id_shape": {
+          "kind": "literal",
+          "length": 1
+        },
+        "value_name_shape": {
+          "kind": "literal",
+          "length": 4
+        }
+      }
+    ],
+    "scenario_kind": "create",
+    "scenario_stages": [
+      "save"
+    ],
+    "step_count": 9,
+    "step_order": [
+      "open_orgchangereason|open_form|haos_orgchangereason",
+      "load_orgchangereason|invoke|haos_orgchangereason",
+      "selectTab_3|invoke|homs_apphome",
+      "click_tblnew|invoke|haos_orgchangereason",
+      "load_orgchangereason_2|invoke|haos_orgchangereason",
+      "fill_haos_orgchangereason_recorded_defaults|update_fields|haos_orgchangereason",
+      "fill_number_etc|update_fields|haos_orgchangereason",
+      "click_6|invoke|haos_orgchangereason",
+      "commonSearch_8|invoke|haos_orgchangereason"
+    ],
+    "steps": [
+      {
+        "app_id": "haos",
+        "form_id": "haos_orgchangereason",
+        "id": "open_orgchangereason",
+        "optional": false,
+        "target": "",
+        "type": "open_form"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_orgchangereason",
+        "id": "load_orgchangereason",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "selectTab",
+        "app_id": "homs",
+        "args_count": 1,
+        "form_id": "homs_apphome",
+        "id": "selectTab_3",
+        "key": "_submaintab_",
+        "method": "selectTab",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "new",
+        "app_id": "haos",
+        "args_count": 2,
+        "form_id": "haos_orgchangereason",
+        "id": "click_tblnew",
+        "key": "toolbarap",
+        "method": "itemClick",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "ac": "loadData",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_orgchangereason",
+        "id": "load_orgchangereason_2",
+        "key": "",
+        "method": "loadData",
+        "optional": false,
+        "post_data_fields": [],
+        "type": "invoke"
+      },
+      {
+        "app_id": "haos",
+        "fields": [
+          {
+            "field_key": "createorg",
+            "value_shape": {
+              "kind": "literal",
+              "length": 6
+            }
+          },
+          {
+            "field_key": "ctrlstrategy",
+            "value_shape": {
+              "kind": "literal",
+              "length": 1
+            }
+          }
+        ],
+        "form_id": "haos_orgchangereason",
+        "id": "fill_haos_orgchangereason_recorded_defaults",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "app_id": "haos",
+        "fields": [
+          {
+            "field_key": "name",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          },
+          {
+            "field_key": "number",
+            "value_shape": {
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
+            }
+          }
+        ],
+        "form_id": "haos_orgchangereason",
+        "id": "fill_number_etc",
+        "optional": false,
+        "type": "update_fields"
+      },
+      {
+        "ac": "click",
+        "app_id": "haos",
+        "args_count": 0,
+        "form_id": "haos_orgchangereason",
+        "id": "click_6",
+        "key": "btnsave",
+        "method": "click",
+        "optional": false,
+        "post_data_fields": [
+          {
+            "field_key": "name",
+            "value_shape": {
+              "kind": "multilang",
+              "locales": [
+                "zh_CN",
+                "zh_TW"
+              ],
+              "zh_CN": {
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
+              }
+            }
+          },
+          {
+            "field_key": "number",
+            "value_shape": {
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
+            }
+          }
+        ],
+        "type": "invoke"
+      },
+      {
+        "ac": "commonSearch",
+        "app_id": "haos",
+        "args_count": 3,
+        "form_id": "haos_orgchangereason",
+        "id": "commonSearch_8",
+        "key": "filtercontainerap",
+        "method": "commonSearch",
+        "optional": true,
+        "post_data_fields": [],
+        "type": "invoke"
+      }
+    ],
+    "target_forms": [],
+    "vars": [
+      {
+        "label": "编号",
+        "name": "test_number",
+        "value_shape": {
+          "kind": "template",
+          "tokens": [
+            "${rand:*}"
+          ]
+        }
+      }
+    ]
+  },
+  "preview": {
+    "components": {
+      "coverage_percent": 85,
+      "handler_ids": [
+        "form_load",
+        "field_update",
+        "generic_safe_invoke",
+        "tree_navigation",
+        "portal_navigation",
+        "create_record",
+        "lookup_query"
+      ],
+      "partial_steps": 3,
+      "risk_level": "medium",
+      "supported_steps": 7,
+      "total_steps": 10,
+      "unsupported_steps": 0
+    },
+    "detected_vars": [
+      "test_number"
+    ],
+    "field_catalog": {
+      "count": 5,
+      "field_ids": [
+        "field_haos_orgchangereason_form_createorg",
+        "field_haos_orgchangereason_form_ctrlstrategy",
+        "field_haos_orgchangereason_form_number",
+        "field_haos_orgchangereason_form_name",
+        "control_haos_orgchangereason_form_btnsave_click_click"
+      ],
+      "unknown_count": 0
+    },
+    "generation_gate": {
+      "allow_generate": true,
+      "allow_run": true,
+      "blocker_codes": [],
+      "decision": "ready",
+      "preflight_decision": "ready"
+    },
+    "ir_alignment": {
+      "grade": "A",
+      "issue_codes": [],
+      "risk_level": "low",
+      "warning_codes": []
+    },
+    "main_form_id": "haos_orgchangereason",
+    "maintainability": {
+      "auto_resolve_pick_count": 0,
+      "business_flow_count": 2,
+      "business_flow_step_count": 10,
+      "detected_var_count": 1,
+      "high_env_sensitive_count": 0,
+      "ir_interaction_bridge_status": "ready",
+      "ir_interaction_count": 0,
+      "ir_interaction_high_risk_uncovered_count": 0,
+      "ir_interaction_uncovered_count": 0,
+      "ir_write_anchor_count": 1,
+      "ir_write_anchor_uncovered_count": 0,
+      "ir_write_bridge_status": "ready",
+      "ir_write_contract_missing_count": 0,
+      "pick_field_count": 2,
+      "response_contract_counts": {
+        "advisory": 0,
+        "business": 0,
+        "critical": 1
+      },
+      "response_signature_step_count": 1
+    },
+    "pageid_alignment": {
+      "grade": "A",
+      "issue_codes": [],
+      "preserve_l2_count": 0,
+      "recorded_cross_form_count": 0,
+      "recorded_exact_link_count": 6,
+      "recorded_external_root_count": 1,
+      "recorded_filtered_source_count": 0,
+      "recorded_reuse_after_close_count": 1,
+      "risk_level": "low"
+    },
+    "pick_field_keys": [
+      "createorg",
+      "ctrlstrategy"
+    ],
+    "quality": {
+      "blocking": false,
+      "grade": "A",
+      "issue_codes": [],
+      "score": 100
+    },
+    "scenario_kind": "create",
+    "scenario_stages": [
+      "save"
+    ]
+  },
+  "sample_id": "09_change_reason_bbb",
+  "schema_version": 2,
+  "source_har": "preview_1782281194_基础资料-变动原因BBB.har",
+  "source_sha256": "b80ba3f6366868b49122aac79ddbfde7db757b9568bab203c9015244f02e36c9",
+  "summary_hash": "a933c88ee046af0a092f973c32e07fb7ed14710c88ae4d7edf9f9fa22530c9c0",
+  "title": "基础资料-变动原因BBB"
+}

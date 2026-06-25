@@ -21,16 +21,16 @@
       "signatures": [
         "1|field_hrbm_logicentity_display_entry_number|text|vars|test_number|",
         "2|control_hrbm_logicentity_display_entry_advcontoolbarap_newentry_itemclick|button|structural||",
-        "3|field_hrbm_logicentity_display_entry_ename|multi_lang_text|vars||",
-        "4|field_hrbm_logicentity_display_entry_fieldtype|text|vars||",
+        "3|field_hrbm_logicentity_display_entry_ename|multi_lang_text|vars|test_ename|",
+        "4|field_hrbm_logicentity_display_entry_fieldtype|text|vars|test_fieldtype|",
         "5|control_hrbm_text_page_form_btnok_click_click|dialog|structural||",
         "6|field_hrbm_database_page_entry_basedatafield|basedata|pick_fields||pick_basedatafield_id",
         "7|control_hrbm_database_page_form_btnok_click_click|dialog|structural||",
         "8|field_hrbm_basedataprop_page_form_refbasefield|combo|pick_fields||",
         "9|control_hrbm_basedataprop_page_form_btnok_click_click|dialog|structural||",
         "10|control_hrbm_comboitem_page_entry_advcontoolbarap_newentry_itemclick|button|structural||",
-        "11|field_hrbm_comboitem_page_entry_caption|text|vars||",
-        "12|field_hrbm_comboitem_page_entry_value|text|vars||",
+        "11|field_hrbm_comboitem_page_entry_caption|text|vars|test_caption|",
+        "12|field_hrbm_comboitem_page_entry_value|text|vars|test_value|",
         "13|control_hrbm_comboitem_page_form_btnok_updatevalue_click|dialog|structural||",
         "14|control_hrbm_fieldscale_page_form_btnok_click_click|dialog|structural||",
         "15|field_hrbm_amount_page_form_selectcurrentcy|combo|pick_fields||",
@@ -3593,6 +3593,213 @@
       "save"
     ],
     "step_count": 205,
+    "step_order": [
+      "open_portal|open_form|bos_portal_myapp_new",
+      "appItemClick_31|invoke|bos_portal_myapp_new",
+      "load_apphome|invoke|hrbm_apphome",
+      "selectTab_34|invoke|home_page",
+      "load_card_quicklaunch|invoke|bos_card_quicklaunch",
+      "treeMenuClick_41|invoke|hrbm_apphome",
+      "load_bdmanagement|invoke|hrbm_bdmanagement",
+      "selectTab_43|invoke|hrbm_apphome",
+      "postExpandNodes_44|invoke|hrbm_bdmanagement",
+      "click_addsonlogicentity|invoke|hrbm_bdmanagement",
+      "open_logicentity_display|open_form|hrbm_logicentity_display",
+      "load_logicentity_display|invoke|hrbm_logicentity_display",
+      "selectTab_51|invoke|hrbm_apphome",
+      "fill_number|update_fields|hrbm_logicentity_display",
+      "newentry_53|invoke|hrbm_logicentity_display",
+      "newentry_54|invoke|hrbm_logicentity_display",
+      "newentry_55|invoke|hrbm_logicentity_display",
+      "newentry_56|invoke|hrbm_logicentity_display",
+      "newentry_57|invoke|hrbm_logicentity_display",
+      "newentry_58|invoke|hrbm_logicentity_display",
+      "newentry_59|invoke|hrbm_logicentity_display",
+      "newentry_60|invoke|hrbm_logicentity_display",
+      "newentry_61|invoke|hrbm_logicentity_display",
+      "newentry_62|invoke|hrbm_logicentity_display",
+      "newentry_63|invoke|hrbm_logicentity_display",
+      "newentry_64|invoke|hrbm_logicentity_display",
+      "newentry_65|invoke|hrbm_logicentity_display",
+      "newentry_66|invoke|hrbm_logicentity_display",
+      "newentry_67|invoke|hrbm_logicentity_display",
+      "newentry_68|invoke|hrbm_logicentity_display",
+      "entryRowClick_69|invoke|hrbm_logicentity_display",
+      "fill_ename|update_fields|hrbm_logicentity_display",
+      "updateValue_71|invoke|hrbm_logicentity_display",
+      "fill_fieldtype|update_fields|hrbm_logicentity_display",
+      "entryRowClick_73|invoke|hrbm_logicentity_display",
+      "entryRowClick_74|invoke|hrbm_logicentity_display",
+      "fill_ename_2|update_fields|hrbm_logicentity_display",
+      "updateValue_76|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_2|update_fields|hrbm_logicentity_display",
+      "entryRowClick_78|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_3|update_fields|hrbm_logicentity_display",
+      "entryRowClick_80|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_4|update_fields|hrbm_logicentity_display",
+      "entryRowClick_82|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_5|update_fields|hrbm_logicentity_display",
+      "entryRowClick_84|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_6|update_fields|hrbm_logicentity_display",
+      "entryRowClick_86|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_7|update_fields|hrbm_logicentity_display",
+      "entryRowClick_88|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_8|update_fields|hrbm_logicentity_display",
+      "entryRowClick_90|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_9|update_fields|hrbm_logicentity_display",
+      "entryRowClick_92|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_10|update_fields|hrbm_logicentity_display",
+      "entryRowClick_94|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_11|update_fields|hrbm_logicentity_display",
+      "entryRowClick_96|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_12|update_fields|hrbm_logicentity_display",
+      "entryRowClick_98|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_13|update_fields|hrbm_logicentity_display",
+      "entryRowClick_100|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_14|update_fields|hrbm_logicentity_display",
+      "entryRowClick_102|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_15|update_fields|hrbm_logicentity_display",
+      "entryRowClick_104|invoke|hrbm_logicentity_display",
+      "fill_fieldtype_16|update_fields|hrbm_logicentity_display",
+      "entryRowClick_106|invoke|hrbm_logicentity_display",
+      "entryRowClick_107|invoke|hrbm_logicentity_display",
+      "fill_ename_3|update_fields|hrbm_logicentity_display",
+      "updateValue_109|invoke|hrbm_logicentity_display",
+      "fill_ename_4|update_fields|hrbm_logicentity_display",
+      "updateValue_111|invoke|hrbm_logicentity_display",
+      "fill_ename_5|update_fields|hrbm_logicentity_display",
+      "updateValue_113|invoke|hrbm_logicentity_display",
+      "fill_ename_6|update_fields|hrbm_logicentity_display",
+      "updateValue_115|invoke|hrbm_logicentity_display",
+      "fill_ename_7|update_fields|hrbm_logicentity_display",
+      "updateValue_117|invoke|hrbm_logicentity_display",
+      "fill_ename_8|update_fields|hrbm_logicentity_display",
+      "updateValue_119|invoke|hrbm_logicentity_display",
+      "fill_ename_9|update_fields|hrbm_logicentity_display",
+      "updateValue_121|invoke|hrbm_logicentity_display",
+      "fill_ename_10|update_fields|hrbm_logicentity_display",
+      "updateValue_123|invoke|hrbm_logicentity_display",
+      "fill_ename_11|update_fields|hrbm_logicentity_display",
+      "updateValue_125|invoke|hrbm_logicentity_display",
+      "fill_ename_12|update_fields|hrbm_logicentity_display",
+      "updateValue_127|invoke|hrbm_logicentity_display",
+      "fill_ename_13|update_fields|hrbm_logicentity_display",
+      "updateValue_129|invoke|hrbm_logicentity_display",
+      "fill_ename_14|update_fields|hrbm_logicentity_display",
+      "updateValue_131|invoke|hrbm_logicentity_display",
+      "fill_ename_15|update_fields|hrbm_logicentity_display",
+      "updateValue_133|invoke|hrbm_logicentity_display",
+      "fill_ename_16|update_fields|hrbm_logicentity_display",
+      "updateValue_135|invoke|hrbm_logicentity_display",
+      "fill_ename_17|update_fields|hrbm_logicentity_display",
+      "updateValue_137|invoke|hrbm_logicentity_display",
+      "fill_ename_18|update_fields|hrbm_logicentity_display",
+      "updateValue_139|invoke|hrbm_logicentity_display",
+      "fill_ename_19|update_fields|hrbm_logicentity_display",
+      "updateValue_141|invoke|hrbm_logicentity_display",
+      "fill_ename_20|update_fields|hrbm_logicentity_display",
+      "updateValue_143|invoke|hrbm_logicentity_display",
+      "fill_ename_21|update_fields|hrbm_logicentity_display",
+      "updateValue_145|invoke|hrbm_logicentity_display",
+      "entryRowDoubleClick_146|invoke|hrbm_logicentity_display",
+      "fill_ename_22|update_fields|hrbm_logicentity_display",
+      "entryRowClick_148|invoke|hrbm_logicentity_display",
+      "entryRowClick_149|invoke|hrbm_logicentity_display",
+      "fill_ename_23|update_fields|hrbm_logicentity_display",
+      "entryRowClick_151|invoke|hrbm_logicentity_display",
+      "entryRowClick_152|invoke|hrbm_logicentity_display",
+      "fill_ename_24|update_fields|hrbm_logicentity_display",
+      "updateValue_154|invoke|hrbm_logicentity_display",
+      "entryRowDoubleClick_155|invoke|hrbm_logicentity_display",
+      "fill_ename_25|update_fields|hrbm_logicentity_display",
+      "updateValue_157|invoke|hrbm_logicentity_display",
+      "fill_ename_26|update_fields|hrbm_logicentity_display",
+      "updateValue_159|invoke|hrbm_logicentity_display",
+      "fill_ename_27|update_fields|hrbm_logicentity_display",
+      "entryRowClick_161|invoke|hrbm_logicentity_display",
+      "entryRowClick_162|invoke|hrbm_logicentity_display",
+      "fill_ename_28|update_fields|hrbm_logicentity_display",
+      "updateValue_164|invoke|hrbm_logicentity_display",
+      "entryRowDoubleClick_165|invoke|hrbm_logicentity_display",
+      "fill_ename_29|update_fields|hrbm_logicentity_display",
+      "updateValue_167|invoke|hrbm_logicentity_display",
+      "entryRowDoubleClick_168|invoke|hrbm_logicentity_display",
+      "fill_ename_30|update_fields|hrbm_logicentity_display",
+      "updateValue_170|invoke|hrbm_logicentity_display",
+      "updateValue_171|invoke|hrbm_logicentity_display",
+      "load_text_page|invoke|hrbm_text_page",
+      "click_173|invoke|hrbm_text_page",
+      "entryRowClick_175|invoke|hrbm_logicentity_display",
+      "entryRowClick_176|invoke|hrbm_logicentity_display",
+      "load_text_page_2|invoke|hrbm_text_page",
+      "click_178|invoke|hrbm_text_page",
+      "entryRowClick_180|invoke|hrbm_logicentity_display",
+      "entryRowClick_181|invoke|hrbm_logicentity_display",
+      "load_database_page|invoke|hrbm_database_page",
+      "pick_basedatafield|pick_basedata|hrbm_database_page",
+      "click_184|invoke|hrbm_database_page",
+      "entryRowClick_186|invoke|hrbm_logicentity_display",
+      "entryRowClick_187|invoke|hrbm_logicentity_display",
+      "load_database_page_2|invoke|hrbm_database_page",
+      "pick_basedatafield_2|pick_basedata|hrbm_database_page",
+      "click_190|invoke|hrbm_database_page",
+      "entryRowClick_192|invoke|hrbm_logicentity_display",
+      "entryRowClick_193|invoke|hrbm_logicentity_display",
+      "load_basedataprop_page|invoke|hrbm_basedataprop_page",
+      "fill_refbasefield|update_fields|hrbm_basedataprop_page",
+      "click_196|invoke|hrbm_basedataprop_page",
+      "entryRowClick_198|invoke|hrbm_logicentity_display",
+      "entryRowClick_199|invoke|hrbm_logicentity_display",
+      "load_comboitem_page|invoke|hrbm_comboitem_page",
+      "newentry_201|invoke|hrbm_comboitem_page",
+      "newentry_202|invoke|hrbm_comboitem_page",
+      "newentry_203|invoke|hrbm_comboitem_page",
+      "entryRowClick_204|invoke|hrbm_comboitem_page",
+      "fill_caption|update_fields|hrbm_comboitem_page",
+      "entryRowClick_206|invoke|hrbm_comboitem_page",
+      "fill_caption_2|update_fields|hrbm_comboitem_page",
+      "updateValue_208|invoke|hrbm_comboitem_page",
+      "fill_caption_3|update_fields|hrbm_comboitem_page",
+      "updateValue_210|invoke|hrbm_comboitem_page",
+      "fill_value|update_fields|hrbm_comboitem_page",
+      "updateValue_212|invoke|hrbm_comboitem_page",
+      "fill_value_2|update_fields|hrbm_comboitem_page",
+      "updateValue_214|invoke|hrbm_comboitem_page",
+      "fill_value_3|update_fields|hrbm_comboitem_page",
+      "updateValue_216|invoke|hrbm_comboitem_page",
+      "entryRowClick_218|invoke|hrbm_logicentity_display",
+      "entryRowClick_219|invoke|hrbm_logicentity_display",
+      "load_comboitem_page_2|invoke|hrbm_comboitem_page",
+      "newentry_221|invoke|hrbm_comboitem_page",
+      "newentry_222|invoke|hrbm_comboitem_page",
+      "newentry_223|invoke|hrbm_comboitem_page",
+      "entryRowClick_224|invoke|hrbm_comboitem_page",
+      "fill_caption_4|update_fields|hrbm_comboitem_page",
+      "entryRowClick_226|invoke|hrbm_comboitem_page",
+      "fill_caption_5|update_fields|hrbm_comboitem_page",
+      "updateValue_228|invoke|hrbm_comboitem_page",
+      "fill_caption_6|update_fields|hrbm_comboitem_page",
+      "entryRowClick_230|invoke|hrbm_comboitem_page",
+      "fill_value_4|update_fields|hrbm_comboitem_page",
+      "entryRowClick_232|invoke|hrbm_comboitem_page",
+      "fill_value_5|update_fields|hrbm_comboitem_page",
+      "updateValue_234|invoke|hrbm_comboitem_page",
+      "fill_value_6|update_fields|hrbm_comboitem_page",
+      "updateValue_236|invoke|hrbm_comboitem_page",
+      "entryRowClick_238|invoke|hrbm_logicentity_display",
+      "entryRowClick_239|invoke|hrbm_logicentity_display",
+      "load_fieldscale_page|invoke|hrbm_fieldscale_page",
+      "click_241|invoke|hrbm_fieldscale_page",
+      "entryRowClick_243|invoke|hrbm_logicentity_display",
+      "entryRowClick_244|invoke|hrbm_logicentity_display",
+      "load_amount_page|invoke|hrbm_amount_page",
+      "fill_selectcurrentcy|update_fields|hrbm_amount_page",
+      "click_247|invoke|hrbm_amount_page",
+      "pick_menulocal|pick_basedata|hrbm_logicentity_display",
+      "click_saveandeffect|invoke|hrbm_logicentity_display",
+      "postExpandNodes_251|invoke|hrbm_bdmanagement",
+      "load_entitycardentry|invoke|hrbm_entitycardentry"
+    ],
     "steps": [
       {
         "app_id": "bos",
@@ -3993,8 +4200,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4022,8 +4231,10 @@
           {
             "field_key": "fieldtype",
             "value_shape": {
-              "kind": "literal",
-              "length": 9
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
             }
           }
         ],
@@ -4068,8 +4279,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4535,8 +4748,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4570,8 +4785,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4605,8 +4822,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4640,8 +4859,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4675,8 +4896,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4710,8 +4933,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4745,8 +4970,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4780,8 +5007,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4815,8 +5044,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4850,8 +5081,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4885,8 +5118,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4920,8 +5155,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -4955,8 +5192,10 @@
                 "zh_TW"
               ],
               "zh_CN": {
-                "kind": "literal",
-                "length": 8
+                "kind": "template",
+                "tokens": [
+                  "${vars.*}"
+                ]
               }
             }
           }
@@ -5971,8 +6210,10 @@
           {
             "field_key": "caption",
             "value_shape": {
-              "kind": "literal",
-              "length": 1
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
             }
           }
         ],
@@ -6055,7 +6296,10 @@
           {
             "field_key": "value",
             "value_shape": {
-              "kind": "integer"
+              "kind": "template",
+              "tokens": [
+                "${vars.*}"
+              ]
             }
           }
         ],
@@ -6082,7 +6326,8 @@
           {
             "field_key": "value",
             "value_shape": {
-              "kind": "integer"
+              "kind": "literal",
+              "length": 1
             }
           }
         ],
@@ -6109,7 +6354,8 @@
           {
             "field_key": "value",
             "value_shape": {
-              "kind": "integer"
+              "kind": "literal",
+              "length": 1
             }
           }
         ],
@@ -6304,7 +6550,8 @@
           {
             "field_key": "value",
             "value_shape": {
-              "kind": "integer"
+              "kind": "literal",
+              "length": 2
             }
           }
         ],
@@ -6331,7 +6578,8 @@
           {
             "field_key": "value",
             "value_shape": {
-              "kind": "integer"
+              "kind": "literal",
+              "length": 2
             }
           }
         ],
@@ -6358,7 +6606,8 @@
           {
             "field_key": "value",
             "value_shape": {
-              "kind": "integer"
+              "kind": "literal",
+              "length": 2
             }
           }
         ],
@@ -6545,6 +6794,30 @@
     "target_forms": [],
     "vars": [
       {
+        "label": "",
+        "name": "test_caption",
+        "value_shape": {
+          "kind": "literal",
+          "length": 1
+        }
+      },
+      {
+        "label": "名称",
+        "name": "test_ename",
+        "value_shape": {
+          "kind": "literal",
+          "length": 8
+        }
+      },
+      {
+        "label": "字段类型",
+        "name": "test_fieldtype",
+        "value_shape": {
+          "kind": "literal",
+          "length": 9
+        }
+      },
+      {
         "label": "名称",
         "name": "test_name",
         "value_shape": {
@@ -6562,6 +6835,14 @@
           "tokens": [
             "${rand:*}"
           ]
+        }
+      },
+      {
+        "label": "",
+        "name": "test_value",
+        "value_shape": {
+          "kind": "literal",
+          "length": 1
         }
       }
     ]
@@ -6591,8 +6872,12 @@
       "unsupported_steps": 0
     },
     "detected_vars": [
+      "test_caption",
+      "test_ename",
+      "test_fieldtype",
       "test_name",
-      "test_number"
+      "test_number",
+      "test_value"
     ],
     "field_catalog": {
       "count": 18,
@@ -6636,7 +6921,7 @@
       "auto_resolve_pick_count": 1,
       "business_flow_count": 29,
       "business_flow_step_count": 252,
-      "detected_var_count": 2,
+      "detected_var_count": 6,
       "high_env_sensitive_count": 0,
       "ir_interaction_bridge_status": "ready_with_warnings",
       "ir_interaction_count": 157,
@@ -6687,8 +6972,8 @@
   },
   "sample_id": "02_business_model_attach",
   "schema_version": 2,
-  "source_har": "preview_1778835304_业务模型添加一个基础资料附表.har",
+  "source_har": "preview_1782281253_业务模型添加一个基础资料附表.har",
   "source_sha256": "2bbfa262bf712e892342acdc3d8dee49d8449a8f5e621d484180857f96317f5d",
-  "summary_hash": "1c455292c47bf59abf9d44e4cad5afa1bafef8f1870f0e389703f626eb687e45",
+  "summary_hash": "0629cfbed3e806570e86cd888d279f8346148d8907251d39776466a03a3f8cbf",
   "title": "业务模型添加一个基础资料附表"
 }
