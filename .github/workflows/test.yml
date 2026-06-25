@@ -87,7 +87,16 @@ jobs:
           pytest tests/test_core.py -v --tb=short -ra
 
   har-regression-gate:
-    name: HAR IR YAML Regression Gate
+    # NOTE: This job validates the regression ENGINE (snapshot summarize / value
+    # redaction / diff severity classification) via tests that do NOT need HAR
+    # originals. It does NOT run the real HAR baseline compare, because:
+    #   - HAR originals carry session tokens / pageIds and are excluded by
+    #     .gitignore (must never enter the public repo);
+    #   - sanitizing HAR collapses pageIds and changes the extracted snapshot
+    #     (steps dropped) -> a baseline from sanitized HAR would be a FALSE gate.
+    # The REAL HAR baseline compare runs in the local pre-commit hook on a machine
+    # that holds the original HARs:  python scripts/hooks/install_hooks.py
+    name: HAR Regression Engine Tests (no real HAR compare; see local pre-commit hook)
     runs-on: ubuntu-latest
 
     steps:
@@ -105,9 +114,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run full test and HAR regression gate
+      - name: Note on real HAR baseline compare
         run: |
-          python scripts/core_regression_gate.py
+          echo "::notice::Real HAR baseline compare is NOT run in CI (HAR originals are gitignored)."
+          echo "::notice::It runs in the local pre-commit hook: python scripts/hooks/install_hooks.py"
+
+      - name: Run HAR regression engine + baseline sensitive scan
+        run: |
+          python scripts/core_regression_gate.py --skip-pytest
+          pytest tests/unit/test_har_regression.py tests/unit/test_core_regression_gate.py -v --tb=short -ra
 
   test-summary:
     name: Test Summary
