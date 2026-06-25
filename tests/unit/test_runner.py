@@ -4145,6 +4145,65 @@ class TestBatchCompanionActions:
         assert "fill_value" in companions
         assert len(companions["fill_value"]) == 2
 
+    def test_write_anchor_not_merged(self):
+        """写锚点（保存/提交）步骤即使同 source_index 也不被合并。
+
+        复刻“填字段 + 点保存”同一 batchInvokeAction（同 source_index）场景：
+        保存步骤是 no_save_failure 断言挂靠点，必须独立执行保留响应。
+        """
+        steps = [
+            {
+                "id": "fill_description",
+                "type": "update_fields",
+                "form_id": "hbss_enterprise",
+                "app_id": "hbss",
+                "fields": {"description": {"zh_CN": "aaa"}},
+                "ir_sources": [{"source_index": 8, "action_index": 0}],
+            },
+            {
+                "id": "click_save",
+                "type": "invoke",
+                "form_id": "hbss_enterprise",
+                "app_id": "hbss",
+                "ac": "click",
+                "key": "btnsave",
+                "method": "click",
+                "ir_write_anchor": True,
+                "ir_sources": [{"source_index": 8, "action_index": 0}],
+            },
+        ]
+        companions, merged_ids, _anchor = _collect_batch_companion_actions(steps)
+        # 写锚点被排除，剩余 fill_description 落单，两步都不合并
+        assert merged_ids == set()
+        assert companions == {}
+        assert "click_save" not in merged_ids
+
+    def test_write_anchor_by_signature_not_merged(self):
+        """通过请求签名 action_family=save 识别的写锚点也不合并。"""
+        steps = [
+            {
+                "id": "fill_x",
+                "type": "update_fields",
+                "form_id": "f",
+                "app_id": "a",
+                "fields": {"x": "1"},
+                "ir_sources": [{"source_index": 5, "action_index": 0}],
+            },
+            {
+                "id": "submit_y",
+                "type": "invoke",
+                "form_id": "f",
+                "app_id": "a",
+                "key": "btnsubmit",
+                "method": "click",
+                "expected_request_signature": {"action_family": "save"},
+                "ir_sources": [{"source_index": 5, "action_index": 1}],
+            },
+        ]
+        companions, merged_ids, _anchor = _collect_batch_companion_actions(steps)
+        assert merged_ids == set()
+        assert companions == {}
+
 
 # 运行测试命令：
 # cd cosmic-replay-v4 && python -m pytest tests/unit/test_runner.py -v

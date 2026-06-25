@@ -4532,15 +4532,37 @@ def _collect_batch_companion_actions(
     row_index 重建带行光标（selRows）的 updateValue postData，从而原样复刻
     录制时的原子批量请求。若首步本身为 update_fields，则在 anchor_rewrite
     中提供改写信息，令主循环将其改写为等价 invoke 步骤执行。
+
+    ⚠️ 写锚点（保存/提交）步骤即便与前序字段编辑同 source_index 也不参与
+    合并：保存动作的响应是 no_save_failure / no_error_actions 断言及入库
+    证据的挂靠点，必须作为独立步骤执行以保留响应，否则会被并入前序步骤
+    而触发“步骤全过却判业务失败”的误报。
     """
     companion_actions: dict[str, list[dict]] = {}
     merged_ids: set[str] = set()
     anchor_rewrite: dict[str, dict] = {}
 
+    def _is_write_anchor(s: dict) -> bool:
+        """保存/提交写锚点：必须独立执行以保留响应供断言与入库证据校验。"""
+        if s.get("ir_write_anchor"):
+            return True
+        sig = s.get("expected_request_signature") or {}
+        if isinstance(sig, dict) and (
+            sig.get("anchor_reason") == "write_anchor"
+            or sig.get("action_family") == "save"
+        ):
+            return True
+        return False
+
     # 按 source_index 分组 invoke / update_fields 步骤的索引
     groups: dict[int, list[int]] = {}
     for i, s in enumerate(steps):
         if s.get("type") not in ("invoke", "update_fields"):
+            continue
+        # ⭐ 写锚点（保存/提交）步骤不纳入批量合并：其响应是 no_save_failure /
+        # no_error_actions 断言及入库证据的挂靠点，一旦被并入前序步骤就会
+        # 丢失独立响应记录，导致“步骤全过却判业务失败”的误报。
+        if _is_write_anchor(s):
             continue
         ir_sources = s.get("ir_sources") or []
         if not ir_sources or not isinstance(ir_sources, list):

@@ -20,6 +20,7 @@ from lib.har_extractor import (
     load_har, is_business_request, smart_name, _sanitize,
     detect_var_placeholders, AC_TIER,
     generate_step_description, _form_short, _extract_value_prefix, _classify_key,
+    _recorded_default_insert_pos_for_form,
 )
 
 
@@ -387,6 +388,38 @@ class TestVarCollapseGuard:
         vals = [a["fields"]["remark"] for a in new_seq]
         # 相同值仍可复用同一变量引用（不受守卫影响）
         assert vals[0] == vals[1]
+
+
+class TestRecordedDefaultInsertPos:
+    """server_default 上下文字段（如 createorg）注入位置回归。
+
+    回归背景：受控-变动原因用例里 createorg 是服务端打开表单带出的默认必填
+    字段（原始 HAR 保存请求并不含它）。服务端在填 number 时联动校验
+    createorg，提示"请先录入创建组织"。若 recorded_defaults 步骤被插到
+    用户字段填充步骤之后，填 number 时 createorg 仍为空即触发拦截。
+    必须插到该表单第一个 update_fields 之前。
+    """
+
+    def test_insert_before_first_field_fill(self):
+        steps = [
+            {"id": "open", "type": "open_form", "form_id": "haos_orgchangereason"},
+            {"id": "fill_number_etc", "type": "update_fields", "form_id": "haos_orgchangereason"},
+            {"id": "click_6", "type": "invoke", "form_id": "haos_orgchangereason",
+             "ir_write_anchor": True},
+        ]
+        pos = _recorded_default_insert_pos_for_form(steps, "haos_orgchangereason")
+        # 必须落在 fill_number_etc(index=1) 之前
+        assert pos == 1
+
+    def test_fallback_to_write_anchor_when_no_field_fill(self):
+        steps = [
+            {"id": "open", "type": "open_form", "form_id": "f"},
+            {"id": "selectTab", "type": "invoke", "form_id": "f"},
+            {"id": "save", "type": "invoke", "form_id": "f", "ir_write_anchor": True},
+        ]
+        pos = _recorded_default_insert_pos_for_form(steps, "f")
+        # 无字段填充步骤时退回写锚点(index=2)之前
+        assert pos == 2
 
 
 # 运行测试命令：

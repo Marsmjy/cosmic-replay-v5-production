@@ -4510,7 +4510,7 @@ def _append_recorded_default_update_steps(
         return steps
 
     for form_id, injected in injected_by_form.items():
-        insert_pos = _write_anchor_pos_for_form(out, form_id)
+        insert_pos = _recorded_default_insert_pos_for_form(out, form_id)
         out.insert(insert_pos, injected)
     return out
 
@@ -5298,6 +5298,26 @@ def _write_anchor_pos_for_form(steps: list[dict], form_id: str) -> int:
         idx for idx, step in enumerate(steps)
         if step.get("form_id") == form_id and _is_write_anchor_step(step)
     ), len(steps))
+
+
+def _recorded_default_insert_pos_for_form(steps: list[dict], form_id: str) -> int:
+    """server_default 上下文字段（如 createorg）的注入位置。
+
+    这类字段是服务端打开表单时带出的默认必填值，且常被服务端用作其它
+    字段的联动前置校验（例如填 number 时校验“请先录入创建组织”）。因此
+    必须在该表单的第一个用户字段填充步骤（update_fields）之前恢复，否则
+    填普通字段时会触发服务端“请先录入 XX”拦截。
+
+    优先返回该 form 第一个 update_fields 步骤的位置；若没有字段填充步骤，
+    退回到写入锚点（保存）之前，保持原有行为。
+    """
+    first_field_pos = next((
+        idx for idx, step in enumerate(steps)
+        if step.get("form_id") == form_id and step.get("type") == "update_fields"
+    ), None)
+    if first_field_pos is not None:
+        return first_field_pos
+    return _write_anchor_pos_for_form(steps, form_id)
 
 
 _VAR_REF_RE = re.compile(r"\$\{vars\.([A-Za-z_][A-Za-z0-9_]*)\}")
