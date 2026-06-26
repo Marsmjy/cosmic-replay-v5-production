@@ -34,7 +34,7 @@ pip install -r requirements.txt
 open http://127.0.0.1:8768
 ```
 
-启动后默认进入模块化 vNext 工作台；旧页面保留在 `/legacy`。上传 HAR
+启动后进入 Web 工作台。上传 HAR
 即可导入生成用例。如果要**执行用例**，需要先配置苍穹账号：
 
 ```bash

@@ -168,7 +168,7 @@ class TestWebUiEntrypoints:
         return TestClient(APP)
 
     def test_root_serves_legacy_by_default(self, client, monkeypatch):
-        # 主线决策（commit 349c71c）：默认前端为 legacy，vnext 需显式设环境变量
+        # 主线决策：legacy 是唯一前端主线（vnext 已移除）
         monkeypatch.delenv("COSMIC_WEBUI_MODE", raising=False)
 
         response = client.get("/")
@@ -176,26 +176,14 @@ class TestWebUiEntrypoints:
         assert response.status_code == 200
         assert "x-data=\"app()\"" in response.text
 
-    def test_root_serves_vnext_when_flag_enabled(self, client, monkeypatch):
-        monkeypatch.setenv("COSMIC_WEBUI_MODE", "vnext")
-
-        response = client.get("/")
-
-        assert response.status_code == 200
-        assert "Cosmic Replay vNext" in response.text
-        assert "/static/vnext/js/app.js" in response.text
-
-    def test_legacy_route_and_feature_flag_keep_old_page_available(
-        self, client, monkeypatch
-    ):
+    def test_legacy_route_keeps_old_page_available(self, client, monkeypatch):
         direct = client.get("/legacy")
-        monkeypatch.setenv("COSMIC_WEBUI_MODE", "legacy")
-        flagged = client.get("/")
+        root = client.get("/")
 
         assert direct.status_code == 200
-        assert flagged.status_code == 200
+        assert root.status_code == 200
         assert "x-data=\"app()\"" in direct.text
-        assert "x-data=\"app()\"" in flagged.text
+        assert "x-data=\"app()\"" in root.text
 
 
 class TestConfigEndpoints:

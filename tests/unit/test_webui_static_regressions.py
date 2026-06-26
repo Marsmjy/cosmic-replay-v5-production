@@ -8,51 +8,6 @@ def _index_html() -> str:
     return (PROJECT_ROOT / "lib" / "webui" / "static" / "index.html").read_text(encoding="utf-8")
 
 
-def _vnext_file(relative: str) -> str:
-    return (
-        PROJECT_ROOT / "lib" / "webui" / "static" / "vnext" / relative
-    ).read_text(encoding="utf-8")
-
-
-def test_vnext_is_modular_and_keeps_legacy_as_explicit_fallback():
-    html = _vnext_file("index.html")
-    app = _vnext_file("js/app.js")
-
-    assert 'href="/legacy"' in html
-    assert 'src="/static/vnext/js/app.js"' in html
-    assert 'from "./state.js"' in app
-    assert 'from "./api-client.js"' in app
-    assert "technical-drawer.js" in app
-
-
-def test_vnext_uses_one_field_catalog_value_lineage_and_persisted_validation_points():
-    fields = _vnext_file("js/components/field-editor.js")
-    validation = _vnext_file("js/components/validation-points.js")
-    workspace = _vnext_file("js/workspaces/import-workspace.js")
-
-    assert "preview.field_catalog" in fields
-    assert "录制值" in fields
-    assert "用户值" in fields
-    assert "目标环境解析" in fields
-    assert "最终值" in fields
-    assert "必需" in validation
-    assert "用户启用" in validation
-    assert "建议" in validation
-    assert "技术契约" in validation
-    assert "validation_point_overrides: state.validationDrafts" in workspace
-
-
-def test_vnext_result_has_one_conclusion_and_action_backed_by_result_evidence():
-    result = _vnext_file("js/components/result-summary.js")
-    app = _vnext_file("js/app.js")
-
-    assert "result.result_evidence" in result
-    assert "data-result-action" in result
-    assert "write_unverified" in result
-    assert "business_failed" in result
-    assert "api.confirmWrite" in app
-
-
 def test_har_preview_exposes_ir_write_contract_coverage():
     html = _index_html()
 
